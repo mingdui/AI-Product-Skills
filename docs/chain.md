@@ -195,10 +195,23 @@ web-design-extractor            URL / 截图 → design.md，喂给 design-spec-
 | `docs/prd/<f>/clarify.md` | `requirement-clarify` | `prd-write`、`context-to-prd` |
 | `docs/prd/<f>/design.md` | `web-design-extractor` 或人工 | `design-spec-prototyper` |
 | `docs/prd/<f>/prototype.html` | `design-spec-prototyper`、`prototype-html` | `acceptance-checklist`、人（交给研发） |
-| `docs/prd/<f>/demo.md` | `pm-frontend-prototype` | 人（交给研发） |
+| `docs/prd/<f>/demo.md` | `pm-frontend-prototype`（**仅此一路**，且可选） | 人（交给研发） |
 | `docs/prd/<f>/acceptance.md` | `acceptance-checklist` | 人（走查） |
 | `docs/prd/<f>/images/` | `product-prd-extract` | 人（评审） |
 | `docs/product/<p>/` | `product-experience-foundation` | `prd-write`、各原型 skill |
+
+> **这张表不是「一次运行要产出的清单」。** 别对照它数自己少了几个文件——
+> 每次只产出当前路线需要的那些：`clarify.md` / `prd.md` 属需求侧，
+> `design.md` / `prototype.html` / `demo.md` 属原型侧，`acceptance.md` 要等研发提测，
+> `images/` 只有 Word 路线才有。**没有哪次运行会把 8 个都产出来。**
+
+> **`prototype.html` 与 `demo.md` 互斥。** 原型有两个落点，一次只走一条：
+>
+> - 要**独立单文件 HTML** → `design-spec-prototyper`，产 `prototype.html`
+> - 要**长在你自己的前端项目里** → `pm-frontend-prototype`，原型落在项目源码中，
+>   另记一份 `demo.md` 当交接标记（可选）
+>
+> 走了前一条就不会有 `demo.md`，这不是漏了，是这条路本来就不产它。
 
 约定：**目录已存在则复用，同名文件不覆盖**。缺 `prd.md` 时，`acceptance-checklist` 会提示你先补
 PRD，而不是凭原型反推需求并当成事实。
