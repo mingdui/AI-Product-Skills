@@ -98,19 +98,19 @@ Nothing to copy by hand.
 
 ## All eleven skills
 
-| Group | Skill | When to use it |
-|---|---|---|
-| Entry | `product-prd-extract` | The requirement arrived as a Word (`.docx`) file. Converts it to structured markdown, marking gaps as `[UNKNOWN]`. **The only skill needing Node ≥ 20** |
-| Entry | `requirement-clarify` | You have one spoken sentence and no boundaries. Asks one question at a time, always digging at "what we're explicitly not doing" |
-| Entry | `context-to-prd` | You've already talked the requirement through with AI. Turns that context into a PRD without re-asking |
-| Core | `prd-write` | Writes a new PRD or revises an existing one, reusing the baseline under `docs/product/` and recording only what changed |
-| Core | `grill-with-prd` | Once the PRD exists, plays a demanding engineer and writes every answer straight back into the file |
-| Core | `design-spec-prototyper` | You have a `design.md` (ideally plus a design mockup image) and need a standalone clickable `prototype.html` |
-| Core | `acceptance-checklist` | Engineering has a test build and you need to walk it before launch. Every item cites its PRD requirement |
-| Branch | `product-experience-foundation` | A first version, onboarding a legacy project, or page patterns starting to diverge. Settle the product rules once, reuse them after |
-| Branch | `web-design-extractor` | You have a competitor URL or screenshot to turn into `design.md`, separating `[OBSERVED]` / `[INFERRED]` / `[UNKNOWN]` |
-| Swap-in | `pm-frontend-prototype` | You already have a frontend project and want the prototype to live inside it, reusing real components and design tokens. Replaces `design-spec-prototyper` |
-| Swap-in | `prototype-html` | You want a single-file prototype with UI on the left and annotations on the right, linked by highlighted connectors. **Third-party** (Apache-2.0), see [THIRD-PARTY.md](THIRD-PARTY.md) |
+| Skill | When to use it |
+|---|---|
+| `product-prd-extract` | The requirement arrived as a Word (`.docx`) file. Converts it to structured markdown, marking gaps as `[UNKNOWN]`. **The only skill needing Node ≥ 20** |
+| `requirement-clarify` | You have one spoken sentence and no boundaries. Asks one question at a time, always digging at "what we're explicitly not doing" |
+| `context-to-prd` | You've already talked the requirement through with AI. Turns that context into a PRD without re-asking |
+| `prd-write` | Writes a new PRD or revises an existing one, reusing the baseline under `docs/product/` and recording only what changed |
+| `grill-with-prd` | Once the PRD exists, plays a demanding engineer and writes every answer straight back into the file |
+| `design-spec-prototyper` | You have a `design.md` (ideally plus a design mockup image) and need a standalone clickable `prototype.html` |
+| `acceptance-checklist` | Engineering has a test build and you need to walk it before launch. Every item cites its PRD requirement |
+| `product-experience-foundation` | A first version, onboarding a legacy project, or page patterns starting to diverge. Settle the product rules once, reuse them after |
+| `web-design-extractor` | You have a competitor URL or screenshot to turn into `design.md`, separating `[OBSERVED]` / `[INFERRED]` / `[UNKNOWN]` |
+| `pm-frontend-prototype` | You already have a frontend project and want the prototype to live inside it, reusing real components and design tokens. Replaces `design-spec-prototyper` |
+| `prototype-html` | You want a single-file prototype with UI on the left and annotations on the right, linked by highlighted connectors. **Third-party** (Apache-2.0), see [THIRD-PARTY.md](THIRD-PARTY.md) |
 
 Each skill's boundaries and details are in its own `skills/<name>/README.md`; how the chain connects is in [docs/chain.md](docs/chain.md).
 

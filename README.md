@@ -92,19 +92,19 @@ URL / 截图 ──→ web-design-extractor ──→ design.md ──→ design
 
 ## 全部 11 个 skill
 
-| 分组 | Skill | 什么时候用它 |
-|---|---|---|
-| 入口 | `product-prd-extract` | 需求来源方给的是 Word（`.docx`）。转成结构化 markdown，缺失信息标 `[UNKNOWN]`。**唯一需要 Node ≥ 20 的 skill** |
-| 入口 | `requirement-clarify` | 只有一句口头需求，边界没问清。一次问一个问题，专门追问「明确不做」 |
-| 入口 | `context-to-prd` | 跟 AI 聊需求已经聊透了。把那段上下文直接固化成 PRD，不再反问 |
-| 主链 | `prd-write` | 写新 PRD 或改已有的。复用 `docs/product/` 下的体验基线，只记本次新增、偏离、候选和待决问题 |
-| 主链 | `grill-with-prd` | PRD 成文之后，扮演挑剔的工程师逐条压测，每个问题答完**立刻**写回文件 |
-| 主链 | `design-spec-prototyper` | 有 `design.md`（最好再配一张设计稿图片），要出独立可点击的 `prototype.html` |
-| 主链 | `acceptance-checklist` | 研发提测了、要上线前逐条走查。每条都指回 PRD 的需求编号 |
-| 支线 | `product-experience-foundation` | 首版产品、旧项目第一次接进来，或页面体验开始不一致。沉淀产品级规则，跑一次后续自动复用 |
-| 支线 | `web-design-extractor` | 有竞品站链接或截图，要提取成 `design.md`。区分 `[OBSERVED]` / `[INFERRED]` / `[UNKNOWN]` |
-| 替换 | `pm-frontend-prototype` | 你已有前端项目，想让原型直接长在项目里、复用真实组件和设计变量，替换 `design-spec-prototyper` |
-| 替换 | `prototype-html` | 想要「界面 + 说明」左右分栏、带连线高亮的单文件原型。**第三方作品**（Apache-2.0），见 [THIRD-PARTY.md](THIRD-PARTY.md) |
+| Skill | 什么时候用它 |
+|---|---|
+| `product-prd-extract` | 需求来源方给的是 Word（`.docx`）。转成结构化 markdown，缺失信息标 `[UNKNOWN]`。**唯一需要 Node ≥ 20 的 skill** |
+| `requirement-clarify` | 只有一句口头需求，边界没问清。一次问一个问题，专门追问「明确不做」 |
+| `context-to-prd` | 跟 AI 聊需求已经聊透了。把那段上下文直接固化成 PRD，不再反问 |
+| `prd-write` | 写新 PRD 或改已有的。复用 `docs/product/` 下的体验基线，只记本次新增、偏离、候选和待决问题 |
+| `grill-with-prd` | PRD 成文之后，扮演挑剔的工程师逐条压测，每个问题答完**立刻**写回文件 |
+| `design-spec-prototyper` | 有 `design.md`（最好再配一张设计稿图片），要出独立可点击的 `prototype.html` |
+| `acceptance-checklist` | 研发提测了、要上线前逐条走查。每条都指回 PRD 的需求编号 |
+| `product-experience-foundation` | 首版产品、旧项目第一次接进来，或页面体验开始不一致。沉淀产品级规则，跑一次后续自动复用 |
+| `web-design-extractor` | 有竞品站链接或截图，要提取成 `design.md`。区分 `[OBSERVED]` / `[INFERRED]` / `[UNKNOWN]` |
+| `pm-frontend-prototype` | 你已有前端项目，想让原型直接长在项目里、复用真实组件和设计变量。替换 `design-spec-prototyper` |
+| `prototype-html` | 想要「界面 + 说明」左右分栏、带连线高亮的单文件原型。**第三方作品**（Apache-2.0），见 [THIRD-PARTY.md](THIRD-PARTY.md) |
 
 每个 skill 的边界和细节见各自的 `skills/<name>/README.md`；链路怎么衔接见 [docs/chain.md](docs/chain.md)。
 
