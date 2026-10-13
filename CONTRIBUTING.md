@@ -28,6 +28,7 @@
 │   ├── README.md            # 必需
 │   ├── agents/              # 可选（Codex）
 │   ├── references/          # 可选
+│   ├── scripts/             # 可选。只在「绕不开运行环境」时才加，见 CLAUDE.md 第 5、7 条
 │   └── assets/              # 可选
 ├── CHANGELOG.md
 ├── CLAUDE.md
