@@ -1,0 +1,4 @@
+interface:
+  display_name: "网站设计提取器"
+  short_description: "提取有证据支撑的网站设计规格"
+  default_prompt: "使用 $web-design-extractor 将这个网站 URL 或截图转成可直接实现的 design.md。"

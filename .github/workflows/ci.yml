@@ -1,0 +1,92 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hygiene:
+    name: 发布前自检
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 门禁 1：U+FFFD 乱码。
+      # Windows + Git Bash 的 heredoc 会把中文静默写成替换字符，不报错，直接进历史。
+      - name: 门禁 1 — 乱码扫描（U+FFFD）
+        run: |
+          set -euo pipefail
+          # -I：跳过二进制文件，否则 PNG 里的字节序列会被误判成乱码
+          if grep -rnI $'\xef\xbf\xbd' . --exclude-dir=.git --exclude-dir=node_modules; then
+            echo "::error::发现 U+FFFD 替换字符（乱码）。中文内容请用编辑器写入，不要用 shell heredoc。"
+            exit 1
+          fi
+          echo "✅ 无乱码"
+
+      # 门禁 2：泄漏扫描。
+      # 个人绝对路径会把作者的本机目录结构带进公开历史，且 force push 也抹不掉。
+      - name: 门禁 2 — 个人路径扫描
+        run: |
+          set -euo pipefail
+          # 用 . 匹配路径分隔符，避免在 YAML / shell 里转义反斜杠（那会让正则失灵或直接报错）
+          PATTERN='(/Users/[A-Za-z0-9._-]+/|/home/[A-Za-z0-9._-]+/|[A-Za-z]:.Users.)'
+          if grep -rnIE "$PATTERN" . \
+               --exclude-dir=.git \
+               --exclude-dir=node_modules \
+               --exclude=ci.yml; then
+            echo "::error::发现个人绝对路径。请改成相对路径或不依赖路径的说明。"
+            exit 1
+          fi
+          echo "✅ 无个人绝对路径"
+
+      # 门禁 3：内部标识（哨兵列表）。
+      # 哨兵词本身不入库——从仓库变量 INTERNAL_SENTINELS 读取（逗号分隔）。
+      # 未配置该变量时本门禁跳过，不阻塞。
+      - name: 门禁 3 — 内部标识扫描
+        env:
+          SENTINELS: ${{ vars.INTERNAL_SENTINELS }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SENTINELS:-}" ]; then
+            echo "::notice::未配置仓库变量 INTERNAL_SENTINELS，跳过本门禁。"
+            exit 0
+          fi
+          PATTERN=$(printf '%s' "$SENTINELS" | tr ',' '|')
+          if grep -rnIE "$PATTERN" . --exclude-dir=.git --exclude-dir=node_modules; then
+            echo "::error::命中内部标识哨兵词，请替换为通用表述。"
+            exit 1
+          fi
+          echo "✅ 无内部标识命中"
+
+  structure:
+    name: 仓库结构校验
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 每个 skill 必须是 skills/<name>/ 下的独立目录，含 SKILL.md，
+      # 且 frontmatter 的 name 与目录名一致——否则 agent 的发现机制会错位。
+      - name: 校验 skills/ 结构
+        run: |
+          set -euo pipefail
+          fail=0
+          for dir in skills/*/; do
+            name=$(basename "$dir")
+            if [ ! -f "$dir/SKILL.md" ]; then
+              echo "::error file=$dir::缺少 SKILL.md"
+              fail=1
+              continue
+            fi
+            fm=$(sed -n '1,10p' "$dir/SKILL.md" | grep -m1 '^name:' | sed 's/^name:[[:space:]]*//' | tr -d '\r')
+            if [ "$fm" != "$name" ]; then
+              echo "::error file=$dir/SKILL.md::frontmatter name ($fm) 与目录名 ($name) 不一致"
+              fail=1
+            fi
+          done
+          [ "$fail" -eq 0 ] || exit 1
+          echo "✅ skills/ 结构正常，共 $(ls -d skills/*/ | wc -l) 个 skill"

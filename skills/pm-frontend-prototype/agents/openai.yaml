@@ -1,0 +1,4 @@
+interface:
+  display_name: "项目内高保真原型"
+  short_description: "在已有前端项目里做与正式入口隔离的可点击原型"
+  default_prompt: "使用 $pm-frontend-prototype 在现有前端项目里做一套隔离的可点击原型，复用真实组件与设计变量。"

@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>产品原型 - 聚宝盆清算系统 · 清算单元管理</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; overflow: hidden; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #F5F7FA; }
+    ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+
+    /* 连线元素高亮 */
+    .proto-element { position: relative; transition: all 0.2s ease; border-radius: 6px; }
+    .proto-element:hover { box-shadow: 0 0 0 2px #165DFF, 0 4px 12px rgba(22,93,255,0.15); background-color: rgba(22,93,255,0.03); }
+    .proto-element.active-highlight { box-shadow: 0 0 0 2px #165DFF, 0 4px 12px rgba(22,93,255,0.2); background-color: rgba(22,93,255,0.05); }
+
+    .proto-desc { transition: all 0.2s ease; border-radius: 6px; border: 1px solid #fde68a; background-color: #fffbeb; }
+    .proto-desc:hover { background-color: #fef3c7; border-color: #f59e0b; box-shadow: 0 2px 8px rgba(245,158,11,0.15); }
+    .proto-desc.active-highlight { background-color: #fde68a; border-color: #d97706; box-shadow: 0 2px 8px rgba(245,158,11,0.25); }
+
+    /* SVG 连线层 */
+    #connections { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+    .connection-line { fill: none; stroke: #165DFF; stroke-width: 2; opacity: 0.6; transition: all 0.2s ease; }
+    .connection-line.active { stroke-width: 3; opacity: 1; }
+    .connection-label { fill: #fff; font-size: 12px; font-weight: bold; text-anchor: middle; dominant-baseline: central; }
+    .connection-label-bg { fill: #165DFF; }
+
+    /* 菜单样式 */
+    .sidebar-menu-item { transition: all 0.2s; cursor: pointer; }
+    .sidebar-menu-item:hover { background-color: rgba(22,93,255,0.08); color: #165DFF; }
+    .sidebar-menu-item.active { background-color: rgba(22,93,255,0.12); color: #165DFF; border-right: 3px solid #165DFF; }
+
+    /* 表格 */
+    .data-table th { background-color: #F5F7FA; font-weight: 600; color: #333; }
+    .data-table tbody tr { transition: background-color 0.15s; cursor: pointer; }
+    .data-table tbody tr:hover { background-color: rgba(22,93,255,0.04); }
+    .data-table tbody tr.selected { background-color: rgba(22,93,255,0.08); }
+
+    .tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+    .tag-blue { background-color: rgba(22,93,255,0.1); color: #165DFF; }
+    .tag-green { background-color: rgba(0,180,42,0.1); color: #00B42A; }
+    .tag-gray { background-color: #F5F7FA; color: #666; }
+
+    /* 模态框 */
+    .modal-overlay { transition: opacity 0.3s ease; }
+    .modal-content { transition: transform 0.3s ease, opacity 0.3s ease; }
+    .modal-hidden { opacity: 0; pointer-events: none; }
+    .modal-hidden .modal-content { transform: scale(0.95); opacity: 0; }
+
+    /* 响应式 */
+    @media (max-width: 768px) {
+      #app { flex-direction: column; }
+      #left-panel { width: 100% !important; height: 60vh; }
+      #divider { display: none; }
+      #right-panel { width: 100% !important; height: 40vh; border-top: 1px solid #e5e7eb; }
+      #connections { display: none; }
+      .mobile-toggle-btn { display: flex !important; }
+    }
+    .mobile-toggle-btn { display: none; position: fixed; bottom: 20px; right: 20px; z-index: 100; width: 48px; height: 48px; border-radius: 50%; background: #165DFF; color: white; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(22,93,255,0.3); cursor: pointer; border: none; }
+
+    .btn-click:active { transform: scale(0.96); }
+    .form-input:focus { border-color: #165DFF; box-shadow: 0 0 0 3px rgba(22,93,255,0.1); outline: none; }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+  <!-- 移动端切换按钮 -->
+  <button class="mobile-toggle-btn" id="mobileToggle" onclick="toggleMobileView()">
+    <i class="fas fa-info"></i>
+  </button>
+
+  <!-- 主容器 -->
+  <div id="app" class="flex h-screen relative">
+
+    <!-- 左侧：产品界面 -->
+    <div id="left-panel" class="w-[75%] lg:w-[78%] overflow-y-auto bg-gray-50 relative">
+
+      <!-- 顶部导航栏 -->
+      <header class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between sticky top-0 z-10">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-[#165DFF] rounded-lg flex items-center justify-center text-white font-bold text-sm">
+            <i class="fas fa-gem"></i>
+          </div>
+          <h1 class="text-lg font-semibold text-gray-800">聚宝盆清算系统</h1>
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="text-sm text-gray-600"><i class="fas fa-user-circle mr-1"></i> 管理员</span>
+          <button class="text-gray-500 hover:text-gray-700 btn-click"><i class="fas fa-bell"></i></button>
+        </div>
+      </header>
+
+      <div class="flex">
+        <!-- 侧边菜单 -->
+        <aside class="w-56 bg-white border-r border-gray-200 min-h-[calc(100vh-56px)]">
+          <nav class="py-4">
+            <div class="px-4 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">功能菜单</div>
+            <div class="sidebar-menu-item px-4 py-2.5 flex items-center gap-3 text-gray-700">
+              <i class="fas fa-tachometer-alt w-5 text-center"></i><span class="text-sm">仪表盘</span>
+            </div>
+            <!-- ★ 连线 1：清算单元管理菜单 -->
+            <div class="proto-element sidebar-menu-item active px-4 py-2.5 flex items-center gap-3 text-gray-700" data-proto-id="1">
+              <i class="fas fa-cubes w-5 text-center"></i><span class="text-sm">清算单元管理</span>
+            </div>
+            <div class="sidebar-menu-item px-4 py-2.5 flex items-center gap-3 text-gray-700">
+              <i class="fas fa-coins w-5 text-center"></i><span class="text-sm">收入核算</span>
+            </div>
+            <div class="sidebar-menu-item px-4 py-2.5 flex items-center gap-3 text-gray-700">
+              <i class="fas fa-calculator w-5 text-center"></i><span class="text-sm">运营成本核算</span>
+            </div>
+            <div class="sidebar-menu-item px-4 py-2.5 flex items-center gap-3 text-gray-700">
+              <i class="fas fa-user-friends w-5 text-center"></i><span class="text-sm">人力成本核算</span>
+            </div>
+            <div class="sidebar-menu-item px-4 py-2.5 flex items-center gap-3 text-gray-700">
+              <i class="fas fa-shield-alt w-5 text-center"></i><span class="text-sm">保证金核算</span>
+            </div>
+            <div class="sidebar-menu-item px-4 py-2.5 flex items-center gap-3 text-gray-700">
+              <i class="fas fa-database w-5 text-center"></i><span class="text-sm">计提数据</span>
+            </div>
+            <div class="sidebar-menu-item px-4 py-2.5 flex items-center gap-3 text-gray-700">
+              <i class="fas fa-chart-bar w-5 text-center"></i><span class="text-sm">报表统计</span>
+            </div>
+          </nav>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="flex-1 p-6">
+          <!-- 页面标题栏 -->
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h2 class="text-xl font-bold text-gray-800">清算单元管理</h2>
+              <p class="text-sm text-gray-500 mt-1">管理清算单元及其关联的部门关系、渠道关系和分成关系</p>
+            </div>
+            <!-- ★ 连线 2：新增清算单元按钮 -->
+            <div class="proto-element" data-proto-id="2">
+              <button onclick="openModal('addModal')" class="bg-[#165DFF] hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 btn-click transition-colors">
+                <i class="fas fa-plus"></i> 新增清算单元
+              </button>
+            </div>
+          </div>
+
+          <!-- 搜索筛选栏 -->
+          <div class="bg-white rounded-lg border border-gray-200 p-4 mb-4">
+            <div class="flex items-center gap-3 flex-wrap">
+              <input type="text" placeholder="搜索清算单元编号/名称" class="form-input border border-gray-300 rounded-lg px-3 py-2 text-sm w-64">
+              <select class="form-input border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                <option>全部清算单元组</option>
+                <option>证券组</option>
+                <option>基金组</option>
+                <option>衍生品组</option>
+              </select>
+              <button class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm btn-click">
+                <i class="fas fa-search mr-1"></i> 查询
+              </button>
+              <button class="text-gray-500 hover:text-gray-700 text-sm px-2 btn-click">
+                <i class="fas fa-redo mr-1"></i> 重置
+              </button>
+            </div>
+          </div>
+
+          <!-- ★ 连线 3：清算单元列表 -->
+          <div class="proto-element bg-white rounded-lg border border-gray-200 overflow-hidden" data-proto-id="3">
+            <div class="overflow-x-auto">
+              <table class="data-table w-full text-sm">
+                <thead>
+                  <tr>
+                    <th class="px-4 py-3 text-left">清算单元编号</th>
+                    <th class="px-4 py-3 text-left">清算单元名称</th>
+                    <th class="px-4 py-3 text-left">清算单元组</th>
+                    <th class="px-4 py-3 text-center">部门关系</th>
+                    <th class="px-4 py-3 text-center">渠道关系</th>
+                    <th class="px-4 py-3 text-center">分成关系</th>
+                    <th class="px-4 py-3 text-center">状态</th>
+                    <th class="px-4 py-3 text-center">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="selected" onclick="selectRow(this)">
+                    <td class="px-4 py-3 font-mono text-[#165DFF]">CU-2024-001</td>
+                    <td class="px-4 py-3 font-medium">股票交易清算单元A</td>
+                    <td class="px-4 py-3"><span class="tag tag-blue">证券组</span></td>
+                    <td class="px-4 py-3 text-center">3</td>
+                    <td class="px-4 py-3 text-center">5</td>
+                    <td class="px-4 py-3 text-center">2</td>
+                    <td class="px-4 py-3 text-center"><span class="tag tag-green">启用</span></td>
+                    <td class="px-4 py-3 text-center">
+                      <button onclick="event.stopPropagation();openModal('viewDetailModal')" class="text-[#165DFF] hover:text-blue-700 text-sm font-medium btn-click"><i class="fas fa-eye mr-1"></i>查看</button>
+                    </td>
+                  </tr>
+                  <tr onclick="selectRow(this)">
+                    <td class="px-4 py-3 font-mono text-[#165DFF]">CU-2024-002</td>
+                    <td class="px-4 py-3 font-medium">基金代销清算单元B</td>
+                    <td class="px-4 py-3"><span class="tag tag-blue">基金组</span></td>
+                    <td class="px-4 py-3 text-center">2</td>
+                    <td class="px-4 py-3 text-center">4</td>
+                    <td class="px-4 py-3 text-center">1</td>
+                    <td class="px-4 py-3 text-center"><span class="tag tag-green">启用</span></td>
+                    <td class="px-4 py-3 text-center">
+                      <button onclick="event.stopPropagation();openModal('viewDetailModal')" class="text-[#165DFF] hover:text-blue-700 text-sm font-medium btn-click"><i class="fas fa-eye mr-1"></i>查看</button>
+                    </td>
+                  </tr>
+                  <tr onclick="selectRow(this)">
+                    <td class="px-4 py-3 font-mono text-[#165DFF]">CU-2024-003</td>
+                    <td class="px-4 py-3 font-medium">衍生品清算单元C</td>
+                    <td class="px-4 py-3"><span class="tag tag-blue">衍生品组</span></td>
+                    <td class="px-4 py-3 text-center">1</td>
+                    <td class="px-4 py-3 text-center">3</td>
+                    <td class="px-4 py-3 text-center">2</td>
+                    <td class="px-4 py-3 text-center"><span class="tag tag-gray">停用</span></td>
+                    <td class="px-4 py-3 text-center">
+                      <button onclick="event.stopPropagation();openModal('viewDetailModal')" class="text-[#165DFF] hover:text-blue-700 text-sm font-medium btn-click"><i class="fas fa-eye mr-1"></i>查看</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="flex items-center justify-between px-4 py-3 border-t border-gray-200">
+              <span class="text-sm text-gray-500">共 3 条记录</span>
+              <div class="flex items-center gap-1">
+                <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-500 hover:bg-gray-50 btn-click">上一页</button>
+                <button class="px-3 py-1 bg-[#165DFF] text-white rounded text-sm">1</button>
+                <button class="px-3 py-1 border border-gray-300 rounded text-sm text-gray-500 hover:bg-gray-50 btn-click">下一页</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ★ 连线 4：列表行选中效果 -->
+          <div class="mt-6 text-center text-sm text-gray-400" data-proto-id="4">
+            <i class="fas fa-hand-pointer mr-1"></i> 点击列表中的「查看」按钮可查看清算单元详情
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- 分隔线 -->
+    <div id="divider" class="w-px bg-gray-300"></div>
+
+    <!-- 右侧：功能说明（仅保留4条） -->
+    <div id="right-panel" class="w-[25%] lg:w-[22%] overflow-y-auto bg-amber-50 border-l-2 border-dashed border-amber-300">
+      <div class="p-4">
+        <!-- 原型说明标识 -->
+        <div class="mb-4 p-3 bg-amber-100 border border-amber-300 rounded-lg">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="px-2 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded uppercase tracking-wide">Prototype</span>
+            <span class="text-xs font-semibold text-amber-800">原型说明</span>
+          </div>
+          <p class="text-[11px] text-amber-700 leading-relaxed">
+            以下内容为界面元素的功能说明，悬停左侧对应区域可高亮连线。
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2 mb-4 pb-3 border-b border-amber-200">
+          <i class="fas fa-map-signs text-amber-600"></i>
+          <h2 class="text-sm font-bold text-amber-900">功能说明</h2>
+        </div>
+
+        <div class="space-y-3">
+          <!-- 说明 1 -->
+          <div class="proto-desc p-3 active-highlight" data-proto-id="1">
+            <div class="flex items-start gap-2">
+              <span class="flex-shrink-0 w-6 h-6 bg-amber-500 text-white rounded-full text-xs font-bold flex items-center justify-center">1</span>
+              <div>
+                <h3 class="text-sm font-semibold text-gray-800">清算单元管理</h3>
+                <p class="text-xs text-gray-500 mt-1">核心功能菜单入口。进入该模块后，可管理清算单元的增删改查，配置关联的部门关系、渠道关系和分成关系。</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 说明 2 -->
+          <div class="proto-desc p-3" data-proto-id="2">
+            <div class="flex items-start gap-2">
+              <span class="flex-shrink-0 w-6 h-6 bg-amber-500 text-white rounded-full text-xs font-bold flex items-center justify-center">2</span>
+              <div>
+                <h3 class="text-sm font-semibold text-gray-800">新增清算单元</h3>
+                <p class="text-xs text-gray-500 mt-1">创建新的清算单元。需填写清算单元编号、名称、所属清算单元组等基本信息，创建后可继续配置部门和渠道关系。</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 说明 3 -->
+          <div class="proto-desc p-3" data-proto-id="3">
+            <div class="flex items-start gap-2">
+              <span class="flex-shrink-0 w-6 h-6 bg-amber-500 text-white rounded-full text-xs font-bold flex items-center justify-center">3</span>
+              <div>
+                <h3 class="text-sm font-semibold text-gray-800">清算单元列表</h3>
+                <p class="text-xs text-gray-500 mt-1">以表格形式展示所有清算单元。每行显示编号、名称、所属组，以及关联的部门关系数、渠道关系数、分成关系数和当前状态。点击行可展开详情。</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 说明 4 -->
+          <div class="proto-desc p-3" data-proto-id="4">
+            <div class="flex items-start gap-2">
+              <span class="flex-shrink-0 w-6 h-6 bg-amber-500 text-white rounded-full text-xs font-bold flex items-center justify-center">4</span>
+              <div>
+                <h3 class="text-sm font-semibold text-gray-800">清算单元详情</h3>
+                <p class="text-xs text-gray-500 mt-1">展示选中清算单元的完整信息。包含三部分一对多关系：</p>
+                <ul class="text-xs text-gray-500 mt-1 ml-4 list-disc space-y-0.5">
+                  <li><strong>部门关系</strong>：一对多，可关联多个部门关系用于人员归属</li>
+                  <li><strong>渠道关系</strong>：一对多，可包含多个业务渠道关系</li>
+                  <li><strong>分成关系</strong>：一对多，配置与其他清算单元的收益分成比例</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SVG 连线层 -->
+  <svg id="connections" class="absolute top-0 left-0 w-full h-full pointer-events-none"></svg>
+
+  <!-- ========== 模态框：查看详情 ========== -->
+  <div id="viewDetailModal" class="modal-overlay modal-hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/40">
+    <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden" style="max-height: 85vh; overflow-y: auto;">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-10">
+        <h3 class="text-lg font-semibold text-gray-800">CU-2024-001 详情</h3>
+        <button onclick="closeModal('viewDetailModal')" class="text-gray-400 hover:text-gray-600 btn-click"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="px-6 py-5">
+        <!-- 基本信息 -->
+        <div class="bg-gray-50 rounded-lg p-4 mb-4">
+          <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+            <i class="fas fa-info-circle text-[#165DFF]"></i> 基本信息
+          </h4>
+          <div class="grid grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">清算单元编号</label>
+              <div class="text-sm font-mono font-medium text-gray-800">CU-2024-001</div>
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">清算单元名称</label>
+              <div class="text-sm font-medium text-gray-800">股票交易清算单元A</div>
+            </div>
+            <div>
+              <label class="block text-xs text-gray-500 mb-1">清算单元组</label>
+              <div class="text-sm"><span class="tag tag-blue">证券组</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 部门关系 -->
+        <div class="bg-gray-50 rounded-lg p-4 mb-4">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <i class="fas fa-users text-[#165DFF]"></i> 部门关系 <span class="tag tag-gray text-xs">3个</span>
+            </h4>
+          </div>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between bg-white rounded-md px-3 py-2 border border-gray-200">
+              <div class="flex items-center gap-2">
+                <i class="fas fa-building text-gray-400 text-sm"></i>
+                <span class="text-sm">交易运营部</span>
+                <span class="tag tag-gray text-xs">HR-001</span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between bg-white rounded-md px-3 py-2 border border-gray-200">
+              <div class="flex items-center gap-2">
+                <i class="fas fa-building text-gray-400 text-sm"></i>
+                <span class="text-sm">风险控制部</span>
+                <span class="tag tag-gray text-xs">HR-002</span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between bg-white rounded-md px-3 py-2 border border-gray-200">
+              <div class="flex items-center gap-2">
+                <i class="fas fa-building text-gray-400 text-sm"></i>
+                <span class="text-sm">合规监察部</span>
+                <span class="tag tag-gray text-xs">HR-003</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 渠道关系 -->
+        <div class="bg-gray-50 rounded-lg p-4 mb-4">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <i class="fas fa-project-diagram text-[#165DFF]"></i> 渠道关系 <span class="tag tag-gray text-xs">5个</span>
+            </h4>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <div class="flex items-center gap-2 bg-white rounded-md px-3 py-2 border border-gray-200">
+              <i class="fas fa-store text-gray-400 text-sm"></i><span class="text-sm">网上交易</span><span class="tag tag-blue text-xs">CH-001</span>
+            </div>
+            <div class="flex items-center gap-2 bg-white rounded-md px-3 py-2 border border-gray-200">
+              <i class="fas fa-store text-gray-400 text-sm"></i><span class="text-sm">手机APP</span><span class="tag tag-blue text-xs">CH-002</span>
+            </div>
+            <div class="flex items-center gap-2 bg-white rounded-md px-3 py-2 border border-gray-200">
+              <i class="fas fa-store text-gray-400 text-sm"></i><span class="text-sm">柜台交易</span><span class="tag tag-blue text-xs">CH-003</span>
+            </div>
+            <div class="flex items-center gap-2 bg-white rounded-md px-3 py-2 border border-gray-200">
+              <i class="fas fa-store text-gray-400 text-sm"></i><span class="text-sm">电话委托</span><span class="tag tag-blue text-xs">CH-004</span>
+            </div>
+            <div class="flex items-center gap-2 bg-white rounded-md px-3 py-2 border border-gray-200">
+              <i class="fas fa-store text-gray-400 text-sm"></i><span class="text-sm">第三方接入</span><span class="tag tag-blue text-xs">CH-005</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 分成关系 -->
+        <div class="bg-gray-50 rounded-lg p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <i class="fas fa-handshake text-[#165DFF]"></i> 与其他清算单元的分成关系 <span class="tag tag-gray text-xs">2个</span>
+            </h4>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-left text-xs text-gray-500">
+                  <th class="pb-2 font-medium">关联清算单元</th>
+                  <th class="pb-2 font-medium">分成比例</th>
+                  <th class="pb-2 font-medium">生效日期</th>
+                  <th class="pb-2 font-medium">状态</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="border-t border-gray-200">
+                  <td class="py-2">
+                    <div class="font-medium">基金代销清算单元B</div>
+                    <div class="text-xs text-gray-500">CU-2024-002</div>
+                  </td>
+                  <td class="py-2">
+                    <span class="font-mono font-medium text-[#165DFF]">70% : 30%</span>
+                    <div class="text-xs text-gray-500">我方 : 对方</div>
+                  </td>
+                  <td class="py-2 text-gray-600">2024-01-01</td>
+                  <td class="py-2"><span class="tag tag-green text-xs">生效中</span></td>
+                </tr>
+                <tr class="border-t border-gray-200">
+                  <td class="py-2">
+                    <div class="font-medium">衍生品清算单元C</div>
+                    <div class="text-xs text-gray-500">CU-2024-003</div>
+                  </td>
+                  <td class="py-2">
+                    <span class="font-mono font-medium text-[#165DFF]">50% : 50%</span>
+                    <div class="text-xs text-gray-500">我方 : 对方</div>
+                  </td>
+                  <td class="py-2 text-gray-600">2024-03-15</td>
+                  <td class="py-2"><span class="tag tag-green text-xs">生效中</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+        <button onclick="closeModal('viewDetailModal')" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-lg font-medium btn-click">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 模态框 ========== -->
+  <div id="addModal" class="modal-overlay modal-hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/40">
+    <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-800">新增清算单元</h3>
+        <button onclick="closeModal('addModal')" class="text-gray-400 hover:text-gray-600 btn-click"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="px-6 py-5 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">清算单元编号 <span class="text-red-500">*</span></label>
+          <input type="text" placeholder="如：CU-2024-004" class="form-input w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">清算单元名称 <span class="text-red-500">*</span></label>
+          <input type="text" placeholder="请输入清算单元名称" class="form-input w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">清算单元组 <span class="text-red-500">*</span></label>
+          <select class="form-input w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <option>请选择</option><option>证券组</option><option>基金组</option><option>衍生品组</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
+          <textarea rows="2" placeholder="可选填" class="form-input w-full border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+        <button onclick="closeModal('addModal')" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 btn-click">取消</button>
+        <button onclick="closeModal('addModal'); alert('保存成功！')" class="px-4 py-2 bg-[#165DFF] hover:bg-blue-600 text-white text-sm rounded-lg font-medium btn-click">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="editModal" class="modal-overlay modal-hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/40">
+    <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-800">编辑清算单元</h3>
+        <button onclick="closeModal('editModal')" class="text-gray-400 hover:text-gray-600 btn-click"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="px-6 py-5 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">清算单元编号</label>
+          <input type="text" value="CU-2024-001" disabled class="w-full border border-gray-200 bg-gray-100 rounded-lg px-3 py-2 text-sm text-gray-500">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">清算单元名称 <span class="text-red-500">*</span></label>
+          <input type="text" value="股票交易清算单元A" class="form-input w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">清算单元组 <span class="text-red-500">*</span></label>
+          <select class="form-input w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <option selected>证券组</option><option>基金组</option><option>衍生品组</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">状态</label>
+          <div class="flex items-center gap-4">
+            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="status" checked class="text-[#165DFF]"><span class="text-sm">启用</span></label>
+            <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="status" class="text-[#165DFF]"><span class="text-sm">停用</span></label>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+        <button onclick="closeModal('editModal')" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 btn-click">取消</button>
+        <button onclick="closeModal('editModal'); alert('更新成功！')" class="px-4 py-2 bg-[#165DFF] hover:bg-blue-600 text-white text-sm rounded-lg font-medium btn-click">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="addHrModal" class="modal-overlay modal-hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/40">
+    <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-800">添加部门关系</h3>
+        <button onclick="closeModal('addHrModal')" class="text-gray-400 hover:text-gray-600 btn-click"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="px-6 py-5">
+        <label class="block text-sm font-medium text-gray-700 mb-2">选择部门</label>
+        <div class="border border-gray-300 rounded-lg max-h-60 overflow-y-auto">
+          <div class="px-3 py-2 hover:bg-gray-50 cursor-pointer flex items-center gap-2"><input type="checkbox" class="rounded text-[#165DFF]"><span class="text-sm">研究所（HR-004）</span></div>
+          <div class="px-3 py-2 hover:bg-gray-50 cursor-pointer flex items-center gap-2"><input type="checkbox" class="rounded text-[#165DFF]"><span class="text-sm">财富管理部（HR-005）</span></div>
+          <div class="px-3 py-2 hover:bg-gray-50 cursor-pointer flex items-center gap-2"><input type="checkbox" class="rounded text-[#165DFF]"><span class="text-sm">信息技术部（HR-006）</span></div>
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+        <button onclick="closeModal('addHrModal')" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 btn-click">取消</button>
+        <button onclick="closeModal('addHrModal'); alert('添加成功！')" class="px-4 py-2 bg-[#165DFF] hover:bg-blue-600 text-white text-sm rounded-lg font-medium btn-click">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="addChannelModal" class="modal-overlay modal-hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/40">
+    <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-800">添加渠道关系</h3>
+        <button onclick="closeModal('addChannelModal')" class="text-gray-400 hover:text-gray-600 btn-click"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="px-6 py-5">
+        <label class="block text-sm font-medium text-gray-700 mb-2">选择渠道关系</label>
+        <div class="border border-gray-300 rounded-lg max-h-60 overflow-y-auto">
+          <div class="px-3 py-2 hover:bg-gray-50 cursor-pointer flex items-center gap-2"><input type="checkbox" class="rounded text-[#165DFF]"><span class="text-sm">微信小程序（CH-006）</span></div>
+          <div class="px-3 py-2 hover:bg-gray-50 cursor-pointer flex items-center gap-2"><input type="checkbox" class="rounded text-[#165DFF]"><span class="text-sm">H5页面（CH-007）</span></div>
+          <div class="px-3 py-2 hover:bg-gray-50 cursor-pointer flex items-center gap-2"><input type="checkbox" class="rounded text-[#165DFF]"><span class="text-sm">API接入（CH-008）</span></div>
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+        <button onclick="closeModal('addChannelModal')" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 btn-click">取消</button>
+        <button onclick="closeModal('addChannelModal'); alert('添加成功！')" class="px-4 py-2 bg-[#165DFF] hover:bg-blue-600 text-white text-sm rounded-lg font-medium btn-click">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="addSplitModal" class="modal-overlay modal-hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/40">
+    <div class="modal-content bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-800">添加分成关系</h3>
+        <button onclick="closeModal('addSplitModal')" class="text-gray-400 hover:text-gray-600 btn-click"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="px-6 py-5 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">关联清算单元 <span class="text-red-500">*</span></label>
+          <select class="form-input w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+            <option>请选择</option><option>CU-2024-002 基金代销清算单元B</option><option>CU-2024-003 衍生品清算单元C</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">我方比例 (%)</label>
+            <input type="number" value="50" min="0" max="100" class="form-input w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">对方比例 (%)</label>
+            <input type="number" value="50" min="0" max="100" class="form-input w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">生效日期 <span class="text-red-500">*</span></label>
+          <input type="date" class="form-input w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+        <button onclick="closeModal('addSplitModal')" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 btn-click">取消</button>
+        <button onclick="closeModal('addSplitModal'); alert('添加成功！')" class="px-4 py-2 bg-[#165DFF] hover:bg-blue-600 text-white text-sm rounded-lg font-medium btn-click">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ========== 连线绘制 ==========
+    const svg = document.getElementById('connections');
+    const connections = [];
+
+    function drawConnections() {
+      svg.innerHTML = '';
+      connections.length = 0;
+
+      const leftElements = document.querySelectorAll('.proto-element[data-proto-id]');
+      const rightElements = document.querySelectorAll('.proto-desc[data-proto-id]');
+
+      leftElements.forEach(leftEl => {
+        const protoId = leftEl.getAttribute('data-proto-id');
+        const rightEl = document.querySelector(`.proto-desc[data-proto-id="${protoId}"]`);
+        if (!rightEl) return;
+
+        const leftRect = leftEl.getBoundingClientRect();
+        const rightRect = rightEl.getBoundingClientRect();
+        const svgRect = svg.getBoundingClientRect();
+
+        const x1 = leftRect.right - svgRect.left;
+        const y1 = leftRect.top + leftRect.height / 2 - svgRect.top;
+        const x2 = rightRect.left - svgRect.left;
+        const y2 = rightRect.top + rightRect.height / 2 - svgRect.top;
+
+        const cp1x = x1 + (x2 - x1) * 0.5;
+        const cp1y = y1;
+        const cp2x = x1 + (x2 - x1) * 0.5;
+        const cp2y = y2;
+
+        // 路径
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', `M ${x1} ${y1} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x2} ${y2}`);
+        path.setAttribute('class', 'connection-line');
+        path.setAttribute('data-proto-id', protoId);
+        svg.appendChild(path);
+
+        // 编号标签
+        const midX = (x1 + x2) / 2;
+        const midY = (y1 + y2) / 2;
+        const bg = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        bg.setAttribute('cx', midX);
+        bg.setAttribute('cy', midY);
+        bg.setAttribute('r', 11);
+        bg.setAttribute('class', 'connection-label-bg');
+        svg.appendChild(bg);
+
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', midX);
+        text.setAttribute('y', midY);
+        text.setAttribute('dy', '0.05em');
+        text.setAttribute('class', 'connection-label');
+        text.textContent = protoId;
+        svg.appendChild(text);
+
+        connections.push({ protoId, path, leftEl, rightEl });
+      });
+    }
+
+    function highlightConnection(protoId, active) {
+      const conn = connections.find(c => c.protoId === protoId);
+      if (!conn) return;
+      if (active) {
+        conn.path.classList.add('active');
+        conn.leftEl.classList.add('active-highlight');
+        conn.rightEl.classList.add('active-highlight');
+      } else {
+        conn.path.classList.remove('active');
+        conn.leftEl.classList.remove('active-highlight');
+        conn.rightEl.classList.remove('active-highlight');
+      }
+    }
+
+    function bindHoverEvents() {
+      document.querySelectorAll('.proto-element[data-proto-id]').forEach(el => {
+        el.addEventListener('mouseenter', () => highlightConnection(el.getAttribute('data-proto-id'), true));
+        el.addEventListener('mouseleave', () => highlightConnection(el.getAttribute('data-proto-id'), false));
+      });
+      document.querySelectorAll('.proto-desc[data-proto-id]').forEach(el => {
+        el.addEventListener('mouseenter', () => highlightConnection(el.getAttribute('data-proto-id'), true));
+        el.addEventListener('mouseleave', () => highlightConnection(el.getAttribute('data-proto-id'), false));
+      });
+    }
+
+    // ========== 模态框 ==========
+    function openModal(id) { document.getElementById(id).classList.remove('modal-hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('modal-hidden'); }
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.add('modal-hidden'); });
+    });
+
+    // ========== 表格选择 ==========
+    function selectRow(row) {
+      document.querySelectorAll('.data-table tbody tr').forEach(tr => tr.classList.remove('selected'));
+      row.classList.add('selected');
+    }
+
+    // ========== 移动端切换 ==========
+    let mobileShowDesc = false;
+    function toggleMobileView() {
+      mobileShowDesc = !mobileShowDesc;
+      const leftPanel = document.getElementById('left-panel');
+      const rightPanel = document.getElementById('right-panel');
+      const btn = document.getElementById('mobileToggle');
+      if (mobileShowDesc) {
+        leftPanel.style.display = 'none'; rightPanel.style.height = '100vh'; btn.innerHTML = '<i class="fas fa-desktop"></i>';
+      } else {
+        leftPanel.style.display = ''; rightPanel.style.height = ''; btn.innerHTML = '<i class="fas fa-info"></i>';
+      }
+    }
+
+    // ========== 初始化 ==========
+    function init() { drawConnections(); bindHoverEvents(); }
+    document.addEventListener('DOMContentLoaded', () => { setTimeout(init, 100); });
+    let resizeTimer;
+    window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(init, 150); });
+    document.getElementById('left-panel').addEventListener('scroll', () => { requestAnimationFrame(drawConnections); });
+    document.getElementById('right-panel').addEventListener('scroll', () => { requestAnimationFrame(drawConnections); });
+  </script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+interface:
+  display_name: "PRD 编写"
+  short_description: "编写或维护功能 PRD，复用已确认的产品体验基线"
+  default_prompt: "使用 $prd-write 为这个功能写一份增量 PRD，先读 docs/product 下已确认的体验规则。"

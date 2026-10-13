@@ -1,0 +1,4 @@
+interface:
+  display_name: "Word PRD 结构化"
+  short_description: "把 .docx PRD 转成结构化 Markdown，接进产品链路"
+  default_prompt: "使用 $product-prd-extract 解析这份 Word PRD，输出结构化 Markdown 到 docs/prd/<feature-name>/prd.md，缺失信息标 [UNKNOWN]。"

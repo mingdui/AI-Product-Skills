@@ -1,0 +1,4 @@
+interface:
+  display_name: "原型产品化"
+  short_description: "为已确认原型选择正确工程交付路径并实现或交接"
+  default_prompt: "使用 $prototype-to-product 检查项目是否要求 OpenSpec、Superpowers 或其他工程流程；选择正确路径后交付这个已确认的原型。"

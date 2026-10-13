@@ -1,0 +1,4 @@
+interface:
+  display_name: "产品体验基线"
+  short_description: "为具体项目建立并维护 C 端与 Admin 体验基线"
+  default_prompt: "使用 $product-experience-foundation 为当前项目的首版需求建立产品体验基线。"

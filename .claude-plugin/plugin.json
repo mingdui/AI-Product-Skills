@@ -1,0 +1,19 @@
+{
+  "name": "ai-product-skills",
+  "version": "0.1.0",
+  "description": "面向产品经理的 AI 工作流：11 个 skill 串成一条从需求澄清到验收的完整链路。",
+  "author": {
+    "name": "mingdui"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/mingdui/AI-Product-Skills",
+  "repository": "https://github.com/mingdui/AI-Product-Skills",
+  "keywords": [
+    "claude-code",
+    "agent-skills",
+    "ai-agent",
+    "product-management",
+    "prd",
+    "prototype"
+  ]
+}

@@ -1,0 +1,36 @@
+# 编辑器 / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+desktop.ini
+
+# 依赖与构建产物
+node_modules/
+dist/
+build/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# 本地环境与密钥
+.env
+.env.local
+*.local
+
+# 临时文件
+*.log
+*.tmp
+tmp/
+.cache/
+
+# Agent 运行时的本地状态
+.claude/settings.local.json

@@ -1,0 +1,4 @@
+interface:
+  display_name: "设计规格原型生成器"
+  short_description: "将设计规格转为经过验证的 UI 原型"
+  default_prompt: "使用 $design-spec-prototyper 根据这份 design.md 构建无障碍、响应式原型。"

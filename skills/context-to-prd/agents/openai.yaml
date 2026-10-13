@@ -1,0 +1,4 @@
+interface:
+  display_name: "上下文生成 PRD"
+  short_description: "根据对话上下文与代码库现状直接生成 PRD"
+  default_prompt: "使用 $context-to-prd 把当前对话上下文和代码库现状固化成 PRD，不要反问我。"
