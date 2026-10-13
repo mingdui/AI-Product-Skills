@@ -1,7 +1,7 @@
 {
   "name": "ai-product-skills",
   "version": "0.1.0",
-  "description": "面向产品经理的 AI 工作流：11 个 skill 串成一条从需求澄清到验收的完整链路。",
+  "description": "面向产品经理的 AI 工作流：11 个 skill，把需求写成完整 PRD，再做成高保真可交互原型。",
   "author": {
     "name": "mingdui"
   },

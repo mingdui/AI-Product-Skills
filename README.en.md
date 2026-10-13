@@ -1,6 +1,6 @@
 # AI-Product-Skills
 
-AI workflows for product managers: eleven skills covering the whole path from "we got a requirement" to "signed off and shipped."
+AI workflows for product managers: eleven skills that turn a requirement into a complete PRD, and then into a high-fidelity, clickable prototype.
 
 [中文](README.md) · [Installation](docs/installation.md) · [The chain](docs/chain.md) · [Design tools](docs/design-tools.md)
 

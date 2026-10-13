@@ -2,7 +2,7 @@
   "$schema": "https://www.schemastore.org/claude-code-marketplace.json",
   "name": "ai-product-skills",
   "version": "0.1.0",
-  "description": "面向产品经理的 AI 工作流：把「一句话需求」到「可验收的交付」串成一条链——澄清、写 PRD、压测、出高保真原型、交接研发、生成验收清单。",
+  "description": "面向产品经理的 AI 工作流：11 个 skill，把需求写成完整 PRD，再做成高保真可交互原型。",
   "owner": {
     "name": "mingdui",
     "url": "https://github.com/mingdui"
@@ -10,7 +10,7 @@
   "plugins": [
     {
       "name": "ai-product-skills",
-      "description": "11 个产品经理 skill，首尾相接成一条完整链路。每个环节的产物都落在 docs/prd/<feature-name>/ 下，下一个环节直接读取，不用手工搬运。",
+      "description": "11 个产品经理 skill。产出完整 PRD 与高保真可交互原型；每个环节的产物都落在 docs/prd/<feature-name>/ 下，下一个环节直接读取，不用手工搬运。",
       "source": "./",
       "category": "product-management"
     }

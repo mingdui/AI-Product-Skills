@@ -1,6 +1,6 @@
 # AI-Product-Skills
 
-面向产品经理的 AI 工作流：11 个 skill 覆盖从「拿到需求」到「验收交付」的整条路径。
+面向产品经理的 AI 工作流：11 个 skill，把需求写成完整 PRD，再做成高保真可交互原型。
 
 [English](README.en.md) · [安装说明](docs/installation.md) · [链路详解](docs/chain.md) · [出稿工具](docs/design-tools.md)
 
