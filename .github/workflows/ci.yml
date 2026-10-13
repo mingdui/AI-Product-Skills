@@ -14,7 +14,12 @@ jobs:
     name: 发布前自检
     runs-on: ubuntu-latest
     steps:
+      # fetch-depth: 0 —— 门禁 4 要按区间检查提交信息。默认的浅克隆只有最后一个提交，
+      # 上一个提交不在本地对象库里，区间判断会失败并静默退回「只看 HEAD」，
+      # 多提交推送时就会漏掉前面几个。
       - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
 
       # 门禁 1：U+FFFD 乱码。
       # Windows + Git Bash 的 heredoc 会把中文静默写成替换字符，不报错，直接进历史。
