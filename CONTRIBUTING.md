@@ -89,20 +89,30 @@ git config --local user.email   # 每次提交前回读确认
 与 CI 门禁一致，本地先跑一遍：
 
 ```bash
-# 1. 乱码
-grep -rnI $'\xef\xbf\xbd' . --exclude-dir=.git && echo "发现乱码" || echo "无乱码"
+# 1. 工作区乱码
+grep -rnI $'\xef\xbf\xbd' . --exclude-dir=.git --exclude-dir=node_modules \
+  && echo "发现乱码" || echo "无乱码"
 
-# 2. 个人绝对路径
+# 2. 提交信息乱码（门禁 1 扫不到 git 历史，这条是门禁 4 的本地版）
+for sha in $(git log --format=%H origin/main..HEAD); do
+  git log -1 --format=%B "$sha" | grep -q $'\xef\xbf\xbd' && echo "❌ $sha 提交信息有乱码"
+done
+
+# 3. 个人绝对路径
 grep -rnIE '(/Users/[A-Za-z0-9._-]+/|/home/[A-Za-z0-9._-]+/|[A-Za-z]:.Users.)' . --exclude-dir=.git
 
-# 3. skills 结构：每个目录有 SKILL.md，且 frontmatter name 等于目录名
+# 4. skills 结构：每个目录有 SKILL.md，且 frontmatter name 等于目录名
 for d in skills/*/; do
   printf '%s -> %s\n' "$(basename $d)" "$(sed -n '1,10p' $d/SKILL.md | grep -m1 '^name:')"
 done
 
-# 4. 暂存内容与预期一致
+# 5. 暂存内容与预期一致
 git status --short
 ```
+
+**为什么第 2 步单独列**：门禁 1 只看工作区（`git ls-files` 范围），提交信息不在其中。
+而这个环境传中文时偶发吞字，提交信息里混进 U+FFFD 是真实发生过的事——而且**只能靠
+`git commit --amend` + force push 修**，代价比改文件高得多。提交前扫一眼，比事后补救便宜。
 
 ---
 

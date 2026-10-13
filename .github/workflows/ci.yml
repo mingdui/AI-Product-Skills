@@ -67,6 +67,50 @@ jobs:
           fi
           echo "✅ 无内部标识命中（哨兵取自 ming-qa 的 ci.yml）"
 
+      # 门禁 4：提交信息的乱码。
+      # 门禁 1 只扫工作区，看不到 git 历史——提交信息里混进 U+FFFD 时它不会响。
+      # 而中文在这个环境里偶发被吞字，已经中过一次招（见 CHANGELOG）。
+      # 提交信息只能靠 amend + force push 修，所以本门禁是阻塞式：红了就必须处理。
+      - name: 门禁 4 — 提交信息乱码扫描
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          # 先确定要检查哪些提交：PR 用 base，push 用 before，都拿不到就只看 HEAD
+          BASE="${PR_BASE:-${PUSH_BEFORE:-}}"
+          if [ -n "$BASE" ] && [ "$BASE" != "0000000000000000000000000000000000000000" ] \
+             && git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
+            SHAS=$(git log --format=%H "$BASE..$HEAD_SHA")
+            SCOPE="区间 $BASE..$HEAD_SHA"
+          else
+            SHAS=$(git log -1 --format=%H "$HEAD_SHA")
+            SCOPE="仅 HEAD（新分支或强制推送）"
+          fi
+
+          if [ -z "$SHAS" ]; then
+            echo "（无新增提交，跳过）"
+            exit 0
+          fi
+
+          FAIL=0
+          for sha in $SHAS; do
+            MSG=$(git log -1 --format=%B "$sha")
+            if printf '%s' "$MSG" | grep -q $'\xef\xbf\xbd'; then
+              echo "::error::$sha 的提交信息含 U+FFFD 替换字符（乱码）"
+              printf '    首行：%s\n' "$(git log -1 --format=%s "$sha")"
+              FAIL=1
+            fi
+          done
+
+          if [ "$FAIL" -ne 0 ]; then
+            echo "::error::提交信息只能靠 git commit --amend 改，再 force push 修正。"
+            exit 1
+          fi
+          echo "✅ 提交信息无乱码（$SCOPE，共 $(printf '%s\n' $SHAS | wc -l) 个提交）"
+
   structure:
     name: 仓库结构校验
     runs-on: ubuntu-latest

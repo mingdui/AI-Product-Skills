@@ -6,6 +6,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- **CI 门禁 4：提交信息乱码扫描**。门禁 1 只扫工作区，看不到 git 历史——提交信息里混进
+  U+FFFD 时它不会响。而中文在这个环境里偶发被吞字，已经中过一次招（提交信息里的一个汉字
+  变成了替换字符）。提交信息只能靠 `git commit --amend` + force push 修正，所以这道门禁
+  是阻塞式的；同时覆盖 push（`before..sha`）、PR（`base..sha`）和新分支三种区间来源，
+  拿不到区间时兜底只查 HEAD。
+
 ### Removed
 
 - **`prototype-to-product`** —— 移出本仓库，链路改为止于「高保真原型」。

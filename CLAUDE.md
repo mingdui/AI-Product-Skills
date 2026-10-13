@@ -127,7 +127,28 @@ CI 门禁 2 会拦。
 
 Windows + Git Bash 会把 heredoc 里的中文写成 U+FFFD 乱码，**而且不报错**——静默进历史。
 
-用编辑器写入仓库外的临时文件，再 `git commit -F <文件路径>`，提交后 `git log -1 --format=%B` 回读确认。
+用编辑器写入仓库外的临时文件，再 `git commit -F <文件路径>`，提交后回读确认。
+
+### 工具参数里的中文也会被吞字
+
+不只是 heredoc。**agent 传工具参数时，中文偶发被替换成 U+FFFD**——这个仓库实测中过招的字有
+「合」「的」「依赖」「完整」「且」。写完文件必须复扫，提交信息也一样。
+
+工具参数这个通道没法从源头防，只能靠**写完就扫**。CI 两道门禁合起来才覆盖全：
+**门禁 1 扫工作区，门禁 4 扫提交信息**。本地推之前先跑一遍：
+
+```bash
+# 工作区
+grep -rnI $'\xef\xbf\xbd' . --exclude-dir=.git --exclude-dir=node_modules
+
+# 待推送的提交信息
+for sha in $(git log --format=%H origin/main..HEAD); do
+  git log -1 --format=%B "$sha" | grep -q $'\xef\xbf\xbd' && echo "❌ $sha 提交信息有乱码"
+done
+```
+
+**提交信息里的乱码只能靠 `git commit --amend` + force push 修**，比改文件麻烦得多——
+所以别偷懒，提交前先扫。
 
 ### 提交身份
 
