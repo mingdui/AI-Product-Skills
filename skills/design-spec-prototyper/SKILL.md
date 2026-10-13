@@ -22,7 +22,7 @@ description: 将 `design.md` / `DESIGN.md` 等有证据支撑的设计规格，*
 4. 使用用户要求的技术栈；未指定时，默认使用带 Tailwind 的独立 `prototype.html`。
 5. 确定字体来源：`google`、`local` 或 `system`。在线独立原型默认使用 `google`；用户或设计规格可直接指定 Google Fonts 的字体族、字重和斜体。项目已有品牌字体、用户要求离线展示或网络不可控时，优先 `local` 或 `system`。
 6. 确定功能名和需求目录。优先从指定的 PRD、`design.md` 所在目录或用户需求中推断 `<feature-name>`；无法唯一确定时，要求用户指定，不能创建泛化的 `outputs/` 目录。
-7. 所有独立评审产物必须归档到 `docs/prd/<feature-name>/`：默认输出为 `docs/prd/<feature-name>/prototype.html`。`prd.md`、`design.md`、`prototype.html`、`demo.md` 与 `delivery.md` 属于同一功能的可选资产；只创建当前任务需要的文件，不得覆盖既有文件。
+7. 所有独立评审产物必须归档到 `docs/prd/<feature-name>/`：默认输出为 `docs/prd/<feature-name>/prototype.html`。`prd.md`、`design.md`、`prototype.html`、`demo.md` 属于同一功能的可选资产；只创建当前任务需要的文件，不得覆盖既有文件。
 
 ## 需求资产归档
 
@@ -33,8 +33,7 @@ docs/prd/<feature-name>/
 ├── prd.md             # 如已有或本次需要
 ├── design.md          # 设计依据，如已有或本次需要
 ├── prototype.html     # 本 Skill 的默认独立原型产物
-├── demo.md            # 可选：项目内演示的评审结论
-└── delivery.md        # 可选：确认后的工程交付路径
+└── demo.md            # 可选：项目内演示的评审结论
 ```
 
 - 已有 `docs/prd/<feature-name>/` 时，使用同一目录，不创建重复功能文件夹。

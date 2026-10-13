@@ -1,6 +1,6 @@
 # 链路详解
 
-12 个 skill 不是并列清单，是一条链。**衔接靠文件路径，不靠你手工搬运**：每个环节的产物都落在
+11 个 skill 不是并列清单，是一条链。**衔接靠文件路径，不靠你手工搬运**：每个环节的产物都落在
 `docs/prd/<feature-name>/` 下，下一个环节直接读取同一目录。
 
 > 下面每个环节都用 skill 名字做索引，不用编号——编号会随着增删 skill 失效，名字不会。
@@ -27,8 +27,7 @@
                     │                                         │
                     └──────────────┬──────────────────────────┘
                                    ▼
-                      prototype-to-product
-                        生产代码 / 工程交接 + delivery.md
+                        交给研发实现
                                    │
                                    ▼
                       acceptance-checklist
@@ -52,7 +51,6 @@ web-design-extractor            URL / 截图 → design.md，喂给 design-spec-
 | 需求清楚，还要复用已有的产品规则 | `prd-write` |
 | 已经有一份 PRD，想挑毛病 | `grill-with-prd` |
 | 只有 PRD，要出评审原型 | `design-spec-prototyper` |
-| 原型已确认，要交给研发 | `prototype-to-product` |
 | 研发提测了，要走查 | `acceptance-checklist` |
 
 ---
@@ -122,24 +120,11 @@ web-design-extractor            URL / 截图 → design.md，喂给 design-spec-
 | **字体** | 默认 `google`（在线独立原型）；离线用 `local` / `system` |
 | **可选增强** | 规格不完整时可用 `ui-ux-pro-max` 检索设计系统（见 [installation](installation.md)） |
 
-### prototype-to-product —— 原型交付与产品化
-
-| | |
-|---|---|
-| **输入** | 同目录下已有的 `prd.md`、`design.md`、`prototype.html`、`demo.md`；仓库的 `AGENTS.md`、工程规范、脚本与现有组件架构 |
-| **产物** | `direct` 路径：按项目既有架构实现的正式路由、组件、数据、权限、状态与测试。治理路径：项目要求的交接工件 + `docs/prd/<feature-name>/delivery.md` |
-| **路由** | 默认 `delivery_mode: auto`——先读项目规则和已配置工具再决定。**涉及 API 契约、数据模型/迁移、权限、跨模块流程、多人并行或高风险发布时，不默认选 `direct`** |
-| **可能的路径** | `direct` / `openspec` / `superpowers` / 项目自定义流程。工具选择不明确时会停下来问，不凭名字猜命令 |
-| **不做什么** | 不把原型 HTML 当作生产架构；不复制 CDN 脚本、重置样式、临时 mock、重复组件或另一套框架；不虚构后端 API、认证、支付、分析或第三方集成 |
-
-冲突时的权威顺序：仓库 `AGENTS.md` 与安全约定 → 现有应用架构与共享组件 → 已确认的产品体验基线
-→ 已确认的产品需求 → 原型与设计规格（只用于视觉契约）。
-
 ### acceptance-checklist —— 验收清单
 
 | | |
 |---|---|
-| **输入** | `prd.md`（必需）+ `delivery.md` / `prototype.html` |
+| **输入** | `prd.md`（必需）+ `prototype.html`（有则读） |
 | **产物** | `docs/prd/<feature-name>/acceptance.md` |
 | **四个维度** | 核心流程（P0）、边界与异常（P0/P1）、UI 还原度（P1/P2）、数据埋点（P2） |
 | **关键规则** | 每条都要有**依据出处**，指回 PRD 的需求编号。没通过时能立刻分清是需求没写清还是实现没做到 |
@@ -189,15 +174,14 @@ web-design-extractor            URL / 截图 → design.md，喂给 design-spec-
 
 | 文件 | 产出者 | 消费者 |
 |---|---|---|
-| `docs/prd/<f>/prd.md` | `product-prd-extract` / `context-to-prd` / `prd-write` | `grill-with-prd`、各原型 skill、`prototype-to-product`、`acceptance-checklist` |
+| `docs/prd/<f>/prd.md` | `product-prd-extract` / `context-to-prd` / `prd-write` | `grill-with-prd`、各原型 skill、`acceptance-checklist` |
 | `docs/prd/<f>/clarify.md` | `requirement-clarify` | `prd-write`、`context-to-prd` |
 | `docs/prd/<f>/design.md` | `web-design-extractor` 或人工 | `design-spec-prototyper` |
-| `docs/prd/<f>/prototype.html` | `design-spec-prototyper`、`prototype-html` | `prototype-to-product`、`acceptance-checklist` |
-| `docs/prd/<f>/demo.md` | `pm-frontend-prototype` | `prototype-to-product` |
-| `docs/prd/<f>/delivery.md` | `prototype-to-product` | `acceptance-checklist` |
+| `docs/prd/<f>/prototype.html` | `design-spec-prototyper`、`prototype-html` | `acceptance-checklist`、人（交给研发） |
+| `docs/prd/<f>/demo.md` | `pm-frontend-prototype` | 人（交给研发） |
 | `docs/prd/<f>/acceptance.md` | `acceptance-checklist` | 人（走查） |
 | `docs/prd/<f>/images/` | `product-prd-extract` | 人（评审） |
-| `docs/product/<p>/` | `product-experience-foundation` | `prd-write`、各原型 skill、`prototype-to-product` |
+| `docs/product/<p>/` | `product-experience-foundation` | `prd-write`、各原型 skill |
 
-约定：**目录已存在则复用，同名文件不覆盖**。缺 `prd.md` 时，`prototype-to-product` 和
-`acceptance-checklist` 会提示你先补 PRD，而不是凭原型反推需求并当成事实。
+约定：**目录已存在则复用，同名文件不覆盖**。缺 `prd.md` 时，`acceptance-checklist` 会提示你先补
+PRD，而不是凭原型反推需求并当成事实。

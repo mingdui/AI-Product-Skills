@@ -30,6 +30,6 @@
 
 ## 下一步
 
-评审确认后使用 `$prototype-to-product`，由它判断交付路径：直接实现，或交接到项目采用的 OpenSpec、Superpowers 或其他工程治理流程，并在功能目录记录 `delivery.md`。
+评审确认后交给研发按原型实现。
 
 详细规则见 [SKILL.md](SKILL.md)。

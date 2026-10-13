@@ -6,6 +6,14 @@
 
 ## [Unreleased]
 
+### Removed
+
+- **`prototype-to-product`** —— 移出本仓库，链路改为止于「高保真原型」。
+  它的产物 `delivery.md` 只是一份交付路径记录（走了 `direct` 还是 `openspec`、为什么这么选），
+  在「产品把原型交给开发」这个场景里对开发没有帮助；而它面向的 OpenSpec / Superpowers
+  工程治理流程，本仓库的读者多数并不具备。相关引用已全部清理。
+  （该 skill 仍在内部工程脚手架的 `.claude/skills/` 里，需要时可自行取用。）
+
 ## [0.1.0] - 2026-10-13
 
 首个公开版本。12 个 skill，首尾相接成一条从 Word / 口头需求到验收的完整链路。

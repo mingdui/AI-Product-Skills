@@ -41,6 +41,6 @@ docs/prd/<feature-name>/
 
 ## 下一步
 
-评审确认后：需要贴合真实项目语境时使用 `$pm-frontend-prototype`；准备进入正式研发时使用 `$prototype-to-product`。
+评审确认后：需要贴合真实项目语境时使用 `$pm-frontend-prototype`；准备进入正式研发时交给研发按原型实现。
 
 详细规则见 [SKILL.md](SKILL.md)。

@@ -16,7 +16,7 @@ description: 基于 PRD 和交付包生成结构化验收清单，产出 docs/pr
 ## 开始前
 
 1. 确定功能名 `<feature-name>`，定位 `docs/prd/<feature-name>/`。
-2. 读取 `prd.md`（**必需**）；`delivery.md`、`prototype.html`、`demo.md` 有则读。
+2. 读取 `prd.md`（**必需**）；`prototype.html`、`demo.md` 有则读。
    - 没有 `prd.md` 时不要凭原型硬编清单——提示用户先补 PRD，或明确标记本次验收无需求依据。
 3. 提取 PRD 中的需求编号（`R1`、`R2`…）、验收标准、范围外清单，以及交付包里的状态与异常清点。
 

@@ -21,7 +21,7 @@
 ## 输入
 
 - `prd.md`（**必需**——没有就先用 `prd-write` 写）。
-- `delivery.md`、`prototype.html`、`demo.md`（有则读）。
+- `prototype.html`、`demo.md`（有则读）。
 
 ## 产物
 

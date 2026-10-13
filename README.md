@@ -1,14 +1,14 @@
 # AI-Product-Skills
 
-面向产品经理的 AI 工作流：12 个 skill 覆盖从「拿到需求」到「验收交付」的整条路径。
+面向产品经理的 AI 工作流：11 个 skill 覆盖从「拿到需求」到「验收交付」的整条路径。
 
 [English](README.en.md) · [安装说明](docs/installation.md) · [链路详解](docs/chain.md) · [全部 skill](docs/skills.md)
 
 ---
 
-## 场景
+## 使用场景
 
-### 一、要把需求写成 PRD
+### 一、把需求写成完整 PRD
 
 需求来源方给了你一份 Word，或者在会上说了一段话——你需要把它变成开发看得懂的 PRD。
 
@@ -25,9 +25,9 @@ context-to-prd        把你跟 AI 聊好的上下文，直接生成 PRD
   grill-with-prd      扮演挑剔的工程师逐条压测，结论立刻写回原文
 ```
 
-你已有存量产品、规范开始不统一时，见下面的[已有存量产品时](#已有存量产品时)。
+你已有存量产品、规范开始不统一时，先跑一次 `product-experience-foundation`——详见下面折叠的一节。
 
-### 二、要在交给开发之前先把页面做出来
+### 二、生成高保真原型
 
 需求写完了，但光靠 PRD 说不清页面长什么样。这里有两个**互相独立**的选择：**设计从哪来**、**原型放在哪**。
 
@@ -48,7 +48,7 @@ URL / 截图 ──→ web-design-extractor ──→ design.md ──→ design
 
 | 工具给了什么 | 怎么做 |
 |---|---|
-| **可交互的 HTML**<br>prototype-html / Open Design / ui-ux-pro-max / Figma Make / Axhub Make | **直接用。** 它本来就是能点的原型，不必再走一遍管线——拿规格重新生成一遍，只会比原稿更差 |
+| **可交互的 HTML**<br>prototype-html / Open Design / ui-ux-pro-max / Figma Make / Axhub Make | **直接用**——它已经是可以点击的原型 |
 | **只有 UI 图片**<br>Google Stitch / OpenAI Image 2 | **走管线**：图片 → `web-design-extractor` → `design.md` → `design-spec-prototyper` |
 
 ```
@@ -68,38 +68,30 @@ URL / 截图 ──→ web-design-extractor ──→ design.md ──→ design
 | 落点 | 用什么 | 适合 |
 |---|---|---|
 | **独立 HTML 文件** | `design-spec-prototyper`（默认） | 发给别人点、不依赖后端、评审会上直接演示 |
-| **你自己的前端项目里** | `pm-frontend-prototype` | 你已有 React / Vue / HTML 项目——**直接复用真实组件和设计变量**，产出与正式入口隔离的原型路由 |
+| **你自己的前端项目里** | `pm-frontend-prototype` | **有前端项目时优先使用**——已有 React / Vue / HTML 项目，直接复用真实组件和设计变量，产出与正式入口隔离的原型路由 |
 
-**有前端项目时优先用后者**：原型和真实产品长得一样，评审时就不会出现「demo 挺好看，做出来怎么不是这样」。
+<details>
+<summary><strong>已经有存量产品？</strong>先跑一次 <code>product-experience-foundation</code>，把已有规则沉淀成产品级基线</summary>
 
-#### 已有存量产品时
+**不管上面走哪条路子**，只要你已经有一个在跑的产品，都建议先跑一次——把已有的导航、术语、
+页面模式沉淀成产品级基线，C 端 / Admin 各自一份。
 
-既然已经有前端项目、有历史页面，还建议**先跑一次 `product-experience-foundation`**——把已有的导航、
-术语、页面模式沉淀成产品级基线，C 端 / Admin 各自一份。
-
-它跟上一条是**配合关系**：先立规矩，原型才知道该复用哪些组件、遵循哪些模式。跑过一次之后就不用再管了——
-`prd-write` 和各原型 skill 都会自动读它，功能 PRD 不必每次重讲一遍全局规则。
+它跟「原型放在哪」是**配合关系**：先立规矩，原型才知道该复用哪些组件、遵循哪些模式。跑过一次之后
+就不用再管了——`prd-write` 和各原型 skill 都会自动读它，功能 PRD 不必每次重讲一遍全局规则。
 
 **什么时候该跑**：首版产品要立规矩、旧项目第一次接进来，或者你发现「同一个弹窗在三个功能里长得不一样」。
 
-## 效果
+</details>
+
+## 生成产物
 
 每个 skill 的产物都落在**同一个目录**下，下一个环节直接读上一个环节的产物——你不用手工搬运任何东西。
 
-| 你会拿到 | 放在哪 |
-|---|---|
-| 结构化 PRD（8 个维度 + 待确认事项） | `docs/prd/<feature-name>/prd.md` |
-| 可点击、可评审的高保真原型 | `docs/prd/<feature-name>/prototype.html` |
-| 研发交接包（页面路由、状态异常、依赖、验收口径） | `docs/prd/<feature-name>/delivery.md` |
-| 提测后 / 上线前的验收清单 | `docs/prd/<feature-name>/acceptance.md` |
-
-需求确认之后：
-
-```
-prototype-to-product   判断交付路径，按项目既有架构实现生产代码，或产出正式的工程交接工件
-        ↓
-acceptance-checklist   生成提测后 / 上线前能逐条走查的验收清单，每条指回 PRD 的需求编号
-```
+| 什么时候 | 你会拿到 | 放在哪 |
+|---|---|---|
+| 需求理清了 | 结构化 PRD（8 个维度 + 待确认事项） | `docs/prd/<feature-name>/prd.md` |
+| 页面做出来了 | 可点击、可评审的高保真原型 | `docs/prd/<feature-name>/prototype.html` |
+| 研发提测、要上线前走查 | 验收清单，每条指回 PRD 的需求编号 | `docs/prd/<feature-name>/acceptance.md` |
 
 ## 安装
 
@@ -131,13 +123,12 @@ npx skills add mingdui/AI-Product-Skills
 /prd-write                              → docs/prd/user-bulk-import/prd.md
 /grill-with-prd                         → 逐条压测，结论写回 prd.md
 /design-spec-prototyper                 → docs/prd/user-bulk-import/prototype.html
-/prototype-to-product                   → docs/prd/user-bulk-import/delivery.md
 /acceptance-checklist                   → docs/prd/user-bulk-import/acceptance.md
 ```
 
 `<feature-name>` 一律用**小写英文短横线**（`user-bulk-import`）——它会变成目录名，不要用中文。
 
-12 个 skill 各自能做什么、什么时候不该用，见 [docs/skills.md](docs/skills.md)。
+11 个 skill 各自能做什么、什么时候不该用，见 [docs/skills.md](docs/skills.md)。
 
 ---
 

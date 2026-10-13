@@ -5,7 +5,7 @@ description: 把 Word（.docx）PRD 或粘贴的 PRD 文本转成结构化 Markd
 
 # Word PRD 结构化
 
-需求来源方给的常常是一份 Word——格式自由、信息分散、隐含假设多。本 Skill 把它转成结构化 Markdown 落到 `docs/prd/<feature-name>/prd.md`，让 `grill-with-prd`、`prototype-to-product`、`acceptance-checklist` 能直接读。
+需求来源方给的常常是一份 Word——格式自由、信息分散、隐含假设多。本 Skill 把它转成结构化 Markdown 落到 `docs/prd/<feature-name>/prd.md`，让 `grill-with-prd`、各原型 skill、`acceptance-checklist` 能直接读。
 
 **只做转换与结构化，不发明需求。** 原文没写的，一律标 `[UNKNOWN]`。
 
@@ -20,7 +20,7 @@ description: 把 Word（.docx）PRD 或粘贴的 PRD 文本转成结构化 Markd
 ## 依赖与自动准备
 
 `.docx` 本质是 ZIP 压缩的 XML，Read 工具读不了，所以本 skill 自带一个 Node 解析脚本。
-**这是本仓库 12 个 skill 里唯一有运行环境要求的**，其余全是纯 Markdown。
+**这是本仓库 11 个 skill 里唯一有运行环境要求的**，其余全是纯 Markdown。
 
 脚本需要 Node.js ≥ 20 和三个开源解析库（`mammoth`、`jszip`、`xml2js`）。
 

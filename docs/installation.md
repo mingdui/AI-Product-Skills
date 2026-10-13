@@ -39,7 +39,7 @@ npm --prefix "<本 skill 目录>/scripts" install
 /plugin install ai-product-skills
 ```
 
-装完后 12 个 skill 全部可用，用斜杠命令直接调：
+装完后 11 个 skill 全部可用，用斜杠命令直接调：
 
 ```
 /requirement-clarify
@@ -112,7 +112,6 @@ cp -r skills/prd-write ~/.claude/skills/
 │   │   ├── prd.md
 │   │   ├── design.md
 │   │   ├── prototype.html
-│   │   ├── delivery.md
 │   │   └── acceptance.md
 │   └── product/<project-name>/   # 产品级体验基线（C 端 / Admin 分治）
 └── ...你的代码

@@ -9,7 +9,7 @@
 - 模式：`incremental`（增量） | `full`（完整）
 - 状态：draft（草稿） | in review（评审中） | confirmed（已确认）
 - 负责人 / 评审人：
-- 关联产物：[design.md](design.md)、[prototype.html](prototype.html)、[demo.md](demo.md)、[delivery.md](delivery.md)（只列实际存在的文件）
+- 关联产物：[design.md](design.md)、[prototype.html](prototype.html)、[demo.md](demo.md)（只列实际存在的文件）
 
 ## 1. 执行摘要
 <谁需要什么变化、为什么是现在、预期影响。>

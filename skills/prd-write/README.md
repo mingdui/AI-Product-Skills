@@ -22,8 +22,7 @@ docs/prd/<feature-name>/
 ├── prd.md              # 本 Skill 的产物
 ├── design.md           # 可选：设计规格
 ├── prototype.html      # 可选：独立评审原型
-├── demo.md             # 可选：项目内演示结论
-└── delivery.md         # 可选：工程交付路径
+└── demo.md             # 可选：项目内演示结论
 ```
 
 以 [template.md](template.md) 为骨架。增量模式必须保留 0、1、2、5、7、8、9、10 节；3、4、6 节可精简为“沿用现有结论”或省略。

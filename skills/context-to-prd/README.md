@@ -66,9 +66,9 @@ context-to-prd          （对话上下文 + 代码库 → PRD）← 你在这�
         ↓
 design-spec-prototyper  （design.md → 独立高保真 prototype.html）
         ↓
- prototype-to-product   （原型 → 生产代码 / 工程交接，判断交付路径）
+       交给研发实现
         ↓
-acceptance-checklist    （PRD + 交付包 → 验收清单）
+acceptance-checklist    （PRD + 原型 → 验收清单）
 ```
 
 两条支线，按需插入：

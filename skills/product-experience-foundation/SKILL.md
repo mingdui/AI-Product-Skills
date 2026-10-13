@@ -61,4 +61,4 @@ docs/product/<project-name>/
 - 新增、晋升或拒绝的候选模式及其原因。
 - 仍待产品确认的角色、信息架构或领域规则。
 
-后续使用 `pm-frontend-prototype`、`web-design-extractor`、`design-spec-prototyper` 或 `prototype-to-product` 时，先读取对应端的基线；缺少基线时，不得假装它已经存在。
+后续使用 `pm-frontend-prototype`、`web-design-extractor` 或 `design-spec-prototyper` 时，先读取对应端的基线；缺少基线时，不得假装它已经存在。

@@ -1,4 +1,4 @@
-# 全部 12 个 skill
+# 全部 11 个 skill
 
 一句话版见下表；每个 skill 的边界和细节见各自的 `skills/<name>/README.md`。
 链路怎么衔接见 [chain.md](chain.md)。
@@ -18,7 +18,6 @@
 | `prd-write` | 写新 PRD 或改已有的。复用 `docs/product/` 下的体验基线，只记本次新增、偏离、候选和待决问题。完整模式（首版）与增量模式（默认） |
 | `grill-with-prd` | PRD 成文之后，扮演挑剔的工程师逐条压测，每个问题答完**立刻**写回文件 |
 | `design-spec-prototyper` | `design.md` → 独立可点击的 `prototype.html`。视觉事实以设计规格为准，不临时发挥 |
-| `prototype-to-product` | 原型 → 生产代码，或正式的工程交接。默认 `delivery_mode: auto`，先读项目规则再决定走哪条路 |
 | `acceptance-checklist` | 提测后 / 上线前能逐条走查的验收清单。每条都指回 PRD 的需求编号 |
 
 ## 支线：按需插入
