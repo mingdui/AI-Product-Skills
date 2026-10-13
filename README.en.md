@@ -42,9 +42,6 @@ notice the same modal looks different in three different features.
 
 ### 2. Generating a high-fidelity prototype
 
-The PRD is done, but prose alone won't settle what the page actually looks like. Two **independent**
-choices here: **where the design comes from**, and **where the prototype lives**.
-
 #### Where the design comes from
 
 **Route 1 — you have a reference site.** Use a competitor or reference site as the design basis.
