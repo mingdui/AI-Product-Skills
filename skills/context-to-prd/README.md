@@ -1,20 +1,23 @@
 # context-to-prd
 
-基于当前对话上下文和代码库现状生成 PRD，不采访用户。
+把已经聊透的需求上下文直接落成 PRD，**不采访**。
 
 ## 用途
 
-当你和 AI 已经聊清楚了需求细节（或者 AI 已经探索过代码库），想直接把这些信息固化成一份结构化 PRD 文档时使用。
+你和 AI 已经聊清楚了需求（或者 AI 已经探索过代码库），只差把它固化成一份结构化 PRD。
 
 **适合的场景：**
-- 在一轮讨论之后，希望把共识落成文档
-- AI 已探索过代码库，希望直接出 PRD 而不再重复提问
+
+- 一轮讨论之后，想把共识落成文档
+- AI 已探索过代码库，直接出 PRD 而不再重复提问
 - `requirement-clarify` 已经采访过一轮，`clarify.md` 就绪
 
 **不适合的场景：**
+
 - 需求还很模糊、需要逐步澄清 → 先用 `requirement-clarify`
-- 需要带上已有产品基线写增量 PRD → 用 `prd-write`（它会读取 `docs/product/` 下的基线）
-- 已有 Word（`.docx`）格式的 PRD → 用 `product-prd-extract` 转成结构化 markdown，再接进链路
+- 要复用已有产品体验基线、或写增量 PRD → 用 `prd-write`
+- 已有 Word（`.docx`）格式的 PRD → 用 `product-prd-extract`
+- 已有 PRD，想挑毛病 → 用 `grill-with-prd`
 
 ## 调用方式
 
@@ -29,46 +32,60 @@
 /context-to-prd payment-flow
 ```
 
+feature-name 一律用**小写英文短横线**——它会变成目录名。
+
 ## 输出
 
-生成 `docs/prd/{feature-name}/prd.md`，包含：
+`docs/prd/<feature-name>/prd.md`，**与 `prd-write` 的结构完全一致**——都以
+[`prd-write/template.md`](../prd-write/template.md) 的 0–10 节为骨架：
 
-| 章节 | 内容 |
-|------|------|
-| 问题陈述 | 用户视角的当前痛点 |
-| 解决方案 | 用户视角的解决方案 |
-| 用户故事 | 编号的详细用户故事列表 |
-| 实现决策 | 模块设计、API 契约、架构决策等 |
-| 测试决策 | 需要测试的模块和测试标准 |
-| 范围外 | 明确不包含的内容 |
-| 补充说明 | 其他备注 |
+| 节 | 内容 |
+|---|---|
+| 0 | 文档信息（模式、状态、关联产物） |
+| 1 | 执行摘要 |
+| 2 | 体验关系（复用基线 / 功能局部 / 候选晋升 / 有意偏离） |
+| 3 | 问题与用户 |
+| 4 | 战略背景 |
+| 5 | 范围与方案（含用户流程、范围外） |
+| 6 | 成功指标 |
+| 7 | 需求与验收（按用户可验证的行为组织） |
+| 8 | 依赖、约束与风险 |
+| 9 | 待决问题 |
+| 10 | 交接说明 |
 
-> 需要完整的产品基线复用、四类增量内容（复用 / 局部 / 候选 / 偏离）时，
-> 用 `prd-write` 的完整模板，它比本 Skill 的输出结构更全。
+模块划分与测试范围这类**实现决策写在第 10 节**，不写进第 7 节——第 7 节只写用户能验证的行为。
+
+## 和 prd-write 有什么区别
+
+产出同构、文件名相同。差别只在过程：
+
+| | 本 Skill | `prd-write` |
+|---|---|---|
+| 是否采访 | 不采访 | 不采访 |
+| 是否强制读产品体验基线 | 不强制。有就读进来写进第 2 节，没有就写「无基线」 | **必须查**。增量模式要靠它写清「复用 / 局部 / 候选 / 偏离」 |
+| 典型场景 | 聊透了，一次成文 | 迭代中的功能，要跟已有规范对齐 |
+
+**两个写的是同一个 `prd.md`，不要连着跑。** 写完一个就够了，另一个是用来替补的。
 
 ## 与其他 Skill 的关系
 
-主线是一条：
+```text
+三条入口，按你手上有什么选一条：
 
-```
-三个入口，按你手上有什么选：
+  product-prd-extract    Word（.docx）PRD → 结构化 prd.md
+  requirement-clarify    一句话口头需求 → clarify.md，再交给 prd-write 成文
+  context-to-prd         已经聊透了 → 直接成文（不采访）
 
-  product-prd-extract    Word（.docx）PRD → 结构化 markdown
-  requirement-clarify    一句话口头需求 → clarify.md
-  （已经聊清楚了）        跳过，直接进下一步
+  ★ 成文这一步：context-to-prd 与 prd-write 二选一，不要连着跑
 
         ↓
-context-to-prd          （对话上下文 + 代码库 → PRD）← 你在这里
+  grill-with-prd         对抗式压测，结论立刻写回 prd.md
         ↓
-   prd-write            （复用产品基线，写 / 改 PRD）
-        ↓
-  grill-with-prd        （对抗式压测 PRD，结论写回原文）
-        ↓
-design-spec-prototyper  （design.md → 独立高保真 prototype.html）
+design-spec-prototyper   design.md → 独立高保真 prototype.html
         ↓
        交给研发实现
         ↓
-acceptance-checklist    （PRD + 原型 → 验收清单）
+acceptance-checklist     PRD + 原型 → 验收清单
 ```
 
 两条支线，按需插入：

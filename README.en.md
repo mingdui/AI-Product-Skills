@@ -2,7 +2,7 @@
 
 AI workflows for product managers: eleven skills that turn a requirement into a complete PRD, and then into a high-fidelity, clickable prototype.
 
-[中文](README.md) · [Installation](docs/installation.md) · [The chain](docs/chain.md) · [Design tools](docs/design-tools.md)
+[中文](README.md) · [Installation](docs/installation.md) · [The chain](docs/chain.md) · [Design tools](docs/design-tools.md) · [**A real run, start to finish**](docs/walkthrough.md) (中文)
 
 ---
 
@@ -21,6 +21,7 @@ context-to-prd        context you already worked out with AI → a PRD
 
         ↓
    prd-write          write a new prd.md or revise an existing one, reusing the product baseline
+                      (same structure as context-to-prd — pick one, don't run both)
         ↓
   grill-with-prd      plays a demanding engineer; every answer written back into the file
 ```
@@ -102,7 +103,7 @@ Nothing to copy by hand.
 |---|---|
 | `product-prd-extract` | The requirement arrived as a Word (`.docx`) file. Converts it to structured markdown, marking gaps as `[UNKNOWN]`. **The only skill needing Node ≥ 20** |
 | `requirement-clarify` | You have one spoken sentence and no boundaries. Asks one question at a time, always digging at "what we're explicitly not doing" |
-| `context-to-prd` | You've already talked the requirement through with AI. Turns that context into a PRD without re-asking |
+| `context-to-prd` | You've already talked the requirement through with AI and only need it written up. Turns that context into a PRD without re-asking. **Same structure as `prd-write` — pick one** |
 | `prd-write` | Writes a new PRD or revises an existing one, reusing the baseline under `docs/product/` and recording only what changed |
 | `grill-with-prd` | Once the PRD exists, plays a demanding engineer and writes every answer straight back into the file |
 | `design-spec-prototyper` | You have a `design.md` (ideally plus a design mockup image) and need a standalone clickable `prototype.html` |

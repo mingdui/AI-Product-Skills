@@ -2,7 +2,7 @@
 
 面向产品经理的 AI 工作流：11 个 skill，把需求写成完整 PRD，再做成高保真可交互原型。
 
-[English](README.en.md) · [安装说明](docs/installation.md) · [链路详解](docs/chain.md) · [出稿工具](docs/design-tools.md)
+[English](README.en.md) · [安装说明](docs/installation.md) · [链路详解](docs/chain.md) · [出稿工具](docs/design-tools.md) · [**一次真实运行记录**](docs/walkthrough.md)
 
 ---
 
@@ -21,6 +21,7 @@ context-to-prd        把你跟 AI 聊好的上下文，直接生成 PRD
 
         ↓
    prd-write          复用产品基线，写新的或改已有的 prd.md
+                      （context-to-prd 与它结构相同，二选一，别连着跑）
         ↓
   grill-with-prd      扮演挑剔的工程师逐条压测，结论立刻写回原文
 ```
@@ -96,7 +97,7 @@ URL / 截图 ──→ web-design-extractor ──→ design.md ──→ design
 |---|---|
 | `product-prd-extract` | 需求来源方给的是 Word（`.docx`）。转成结构化 markdown，缺失信息标 `[UNKNOWN]`。**唯一需要 Node ≥ 20 的 skill** |
 | `requirement-clarify` | 只有一句口头需求，边界没问清。一次问一个问题，专门追问「明确不做」 |
-| `context-to-prd` | 跟 AI 聊需求已经聊透了。把那段上下文直接固化成 PRD，不再反问 |
+| `context-to-prd` | 跟 AI 聊需求已经聊透了，只差成文。直接固化成 PRD，不再反问。**与 `prd-write` 结构相同，二选一** |
 | `prd-write` | 写新 PRD 或改已有的。复用 `docs/product/` 下的体验基线，只记本次新增、偏离、候选和待决问题 |
 | `grill-with-prd` | PRD 成文之后，扮演挑剔的工程师逐条压测，每个问题答完**立刻**写回文件 |
 | `design-spec-prototyper` | 有 `design.md`（最好再配一张设计稿图片），要出独立可点击的 `prototype.html` |

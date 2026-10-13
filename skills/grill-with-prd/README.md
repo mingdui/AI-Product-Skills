@@ -50,13 +50,11 @@ PRD 写完之后、开始实现之前，用这个 skill 让 AI 扮演"挑剔的�
 三个入口，按你手上有什么选：
 
   product-prd-extract    Word（.docx）PRD → 结构化 markdown
-  requirement-clarify    一句话口头需求 → clarify.md
-  （已经聊清楚了）        跳过，直接进下一步
+  requirement-clarify    一句话口头需求 → clarify.md，再交给 prd-write 成文
+  context-to-prd         已经聊透了 → 直接成文（不采访）
 
-        ↓
-context-to-prd          （对话上下文 + 代码库 → PRD）
-        ↓
-   prd-write            （复用产品基线，写 / 改 PRD）
+  ★ 成文这一步：context-to-prd 与 prd-write 二选一，产出的是同一个 prd.md
+
         ↓
   grill-with-prd        （对抗式压测 PRD，结论写回原文）← 你在这里
         ↓

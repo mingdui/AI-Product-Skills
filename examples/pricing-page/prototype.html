@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>定价 — 示例 SaaS 产品</title>
+<meta name="description" content="三档套餐：免费版 ¥0、专业版 ¥199/月、企业版按需。查看各档包含的项目数、成员数、存储空间与安全能力。">
+
+<!-- R5：分享预览。预览图为待产出资源，见交付说明。 -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="定价 — 示例 SaaS 产品">
+<meta property="og:description" content="三档套餐：免费版 ¥0、专业版 ¥199/月、企业版按需。">
+<meta property="og:image" content="og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="定价 — 示例 SaaS 产品">
+<meta name="twitter:description" content="三档套餐：免费版 ¥0、专业版 ¥199/月、企业版按需。">
+<meta name="twitter:image" content="og-cover.png">
+
+<!--
+  原型说明
+  - 文件：docs/prd/pricing-page/prototype.html
+  - 依据：prd.md（R1–R6）+ design.md（信息层级与组件规则）
+  - 价格、权益条目均为**占位数据**，等运营口径到位后替换；页面顶部有可见提示，避免被误当真值。
+  - 品牌层未沿用参考站：品牌色、字体均为本产品自有（design.md「重建规则 · 不可假设」）。
+  - 本页不发起任何网络请求，埋点为本地桩函数。
+-->
+<style>
+:root{
+  /* 品牌层——本产品自有，未沿用参考站 */
+  --brand:#0f6b5c;
+  --brand-strong:#0b5449;
+  --brand-soft:#e6f4f1;
+  --brand-ring:rgba(15,107,92,.35);
+
+  /* 文本与表面 */
+  --ink:#16212b;
+  --ink-soft:#5b6b76;
+  --ink-faint:#8a97a1;
+  --canvas:#ffffff;
+  --surface:#f5f7f6;
+  --border:#e2e8e6;
+  --border-strong:#cdd7d3;
+
+  /* 形状——三级圆角 + 两级阴影，借的是层级关系，不是具体值 */
+  --r-sm:6px;
+  --r-md:10px;
+  --r-lg:16px;
+  --r-pill:99px;
+  --shadow-soft:0 2px 8px rgba(18,35,43,.06);
+  --shadow-card:0 18px 48px rgba(18,35,43,.10);
+
+  /* 节奏 */
+  --gap:8px;
+  --container:1120px;
+  --section-y:64px;
+
+  /* 字体来源：system —— 参考站用的是需授权的商业字体，不能沿用；
+     本页为中文内容且要求离线可读，故使用系统字体栈，不引外部字体 */
+  --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Courier New",monospace;
+  --line:1.6;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--canvas);
+  color:var(--ink);
+  font-family:var(--font-sans);
+  font-size:16px;
+  line-height:var(--line);
+}
+h1,h2,h3{margin:0;line-height:1.25;font-weight:650;letter-spacing:-.01em}
+p{margin:0}
+a{color:var(--brand);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* 焦点态：全站统一，键盘可见 */
+:focus-visible{outline:3px solid var(--brand-ring);outline-offset:2px;border-radius:var(--r-sm)}
+
+.container{max-width:var(--container);margin:0 auto;padding:0 20px}
+
+.skip-link{
+  position:absolute;left:-9999px;top:0;background:var(--brand);color:#fff;
+  padding:10px 16px;border-radius:0 0 var(--r-md) 0;z-index:50;
+}
+.skip-link:focus{left:0}
+
+/* 原型提示条 */
+.demo-bar{
+  background:var(--brand-soft);color:var(--brand-strong);
+  font-size:13px;text-align:center;padding:8px 20px;
+  border-bottom:1px solid var(--border);
+}
+
+/* 顶栏——本期不做完整站导航（见 design.md 布局映射） */
+.topbar{border-bottom:1px solid var(--border);background:var(--canvas)}
+.topbar__inner{
+  max-width:var(--container);margin:0 auto;padding:0 20px;
+  height:64px;display:flex;align-items:center;gap:24px;
+}
+.brand{display:flex;align-items:center;gap:10px;color:var(--ink);font-weight:700}
+.brand:hover{text-decoration:none}
+.brand svg{display:block}
+.topnav{display:flex;gap:20px;margin-left:auto;align-items:center;font-size:15px}
+.topnav a{color:var(--ink-soft)}
+.topnav a[aria-current="page"]{color:var(--ink);font-weight:600}
+
+/* 主标题区 */
+.hero{padding:72px 0 40px;text-align:center}
+.hero h1{font-size:clamp(28px,4.2vw,44px);max-width:22ch;margin:0 auto}
+.hero p{margin-top:16px;color:var(--ink-soft);max-width:46ch;margin-left:auto;margin-right:auto}
+
+/* 档位卡片 */
+.plans{padding-bottom:var(--section-y)}
+.plans__grid{
+  display:grid;gap:20px;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  align-items:stretch;
+}
+.plan{
+  display:flex;flex-direction:column;
+  background:var(--canvas);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:28px 24px;
+  box-shadow:var(--shadow-soft);
+}
+.plan--featured{
+  border-color:var(--brand);border-width:2px;
+  box-shadow:var(--shadow-card);
+  position:relative;
+}
+.plan__tag{
+  position:absolute;top:-13px;left:24px;
+  background:var(--brand);color:#fff;
+  font-size:12px;font-weight:600;letter-spacing:.02em;
+  padding:4px 12px;border-radius:var(--r-pill);
+}
+.plan__name{font-size:18px}
+.plan__price{
+  margin-top:14px;display:flex;align-items:baseline;gap:6px;
+  font-family:var(--font-mono);
+}
+.plan__amount{font-size:36px;font-weight:700;letter-spacing:-.02em}
+.plan__cycle{font-size:14px;color:var(--ink-faint)}
+.plan__note{margin-top:6px;font-size:13px;color:var(--ink-faint);min-height:20px}
+.plan__features{
+  list-style:none;margin:22px 0 0;padding:0;
+  display:flex;flex-direction:column;gap:10px;font-size:15px;
+}
+.plan__features li{display:flex;gap:10px;align-items:flex-start;color:var(--ink-soft)}
+.plan__features svg{flex:0 0 auto;margin-top:4px;color:var(--brand)}
+/* 按钮对齐同一基线：把 CTA 推到底部 */
+.plan__cta{margin-top:auto;padding-top:26px}
+
+.btn{
+  display:block;width:100%;text-align:center;
+  padding:12px 18px;border-radius:var(--r-md);
+  font-size:15px;font-weight:600;line-height:1.2;
+  border:1px solid transparent;cursor:pointer;
+  font-family:inherit;
+  transition:background-color .15s ease,border-color .15s ease;
+}
+.btn:hover{text-decoration:none}
+.btn--primary{background:var(--brand);color:#fff}
+.btn--primary:hover{background:var(--brand-strong)}
+.btn--ghost{background:transparent;color:var(--ink);border-color:var(--border-strong)}
+.btn--ghost:hover{background:var(--surface)}
+.btn[disabled]{opacity:.55;cursor:default}
+
+/* 全功能对比（R2） */
+.compare{background:var(--surface);padding:var(--section-y) 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.section-head{text-align:center;margin-bottom:32px}
+.section-head h2{font-size:clamp(22px,3vw,30px)}
+.section-head p{margin-top:12px;color:var(--ink-soft)}
+
+.compare__scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.compare__inner{min-width:640px}
+
+.cgroup{background:var(--canvas);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+.cgroup + .cgroup{margin-top:14px}
+.cgroup__toggle{
+  width:100%;display:flex;align-items:center;gap:12px;
+  background:var(--canvas);border:0;cursor:pointer;
+  padding:18px 22px;font:inherit;font-weight:650;color:var(--ink);
+  text-align:left;
+}
+.cgroup__toggle:hover{background:var(--surface)}
+.cgroup__toggle svg{flex:0 0 auto;color:var(--ink-faint);transition:transform .18s ease}
+.cgroup__toggle[aria-expanded="true"] svg{transform:rotate(90deg)}
+.cgroup__body{padding:0 22px 8px}
+.cgroup__body[hidden]{display:none}
+
+table.ctable{width:100%;border-collapse:collapse;font-size:15px}
+table.ctable th,table.ctable td{
+  text-align:left;padding:12px 10px;border-top:1px solid var(--border);
+  vertical-align:top;
+}
+table.ctable thead th{
+  border-top:0;font-size:13px;font-weight:600;color:var(--ink-faint);
+  text-transform:none;letter-spacing:.02em;
+}
+table.ctable th[scope="row"]{font-weight:500;color:var(--ink)}
+table.ctable td{color:var(--ink-soft)}
+table.ctable .yes{color:var(--brand);font-weight:600}
+table.ctable .no{color:var(--ink-faint)}
+
+/* 常见问题（R4）——details/summary 原生可键盘操作，展开态对读屏可见 */
+.faq{padding:var(--section-y) 0}
+.faq__list{max-width:760px;margin:0 auto}
+.faq details{border-bottom:1px solid var(--border)}
+.faq summary{
+  cursor:pointer;padding:18px 0;font-weight:600;
+  display:flex;align-items:center;gap:12px;list-style:none;
+}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary svg{flex:0 0 auto;margin-left:auto;color:var(--ink-faint);transition:transform .18s ease}
+.faq details[open] summary svg{transform:rotate(45deg)}
+.faq .answer{padding:0 0 18px;color:var(--ink-soft);max-width:64ch}
+
+/* 页脚 / 咨询入口（R3 企业档） */
+.footer{border-top:1px solid var(--border);background:var(--surface);padding:40px 0}
+.footer__inner{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between}
+.footer__text{color:var(--ink-soft);font-size:15px}
+.footer__meta{margin-top:10px;font-size:13px;color:var(--ink-faint)}
+
+@media (max-width:900px){
+  .plans__grid{grid-template-columns:1fr}
+  .hero{padding:48px 0 32px}
+  :root{--section-y:48px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none!important;animation:none!important}
+}
+</style>
+</head>
+<body>
+
+<a class="skip-link" href="#main">跳到主要内容</a>
+
+<p class="demo-bar">原型演示 · 价格与权益为占位数据，最终以运营口径为准</p>
+
+<header class="topbar">
+  <div class="topbar__inner">
+    <a class="brand" href="#main" aria-label="示例 SaaS 产品 首页">
+      <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <rect x="3" y="3" width="18" height="18" rx="5" fill="var(--brand)"></rect>
+        <path d="M8 15.5V9l4 3.2L16 9v6.5" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+      <span>示例 SaaS</span>
+    </a>
+    <nav class="topnav" aria-label="主导航">
+      <a href="#main" aria-current="page">定价</a>
+      <a href="#" data-track="nav_sign_in">登录</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="hero container" aria-labelledby="hero-h">
+    <h1 id="hero-h">把价格讲清楚，再让你决定</h1>
+    <p>三档套餐，按团队规模选。随时可以升级或取消，不需要联系销售。</p>
+  </section>
+
+  <section class="plans container" aria-labelledby="plans-h">
+    <h2 id="plans-h" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap">套餐档位</h2>
+    <div class="plans__grid">
+
+      <!-- 免费版 -->
+      <article class="plan" aria-labelledby="plan-free">
+        <h3 class="plan__name" id="plan-free">免费版</h3>
+        <p class="plan__price">
+          <span class="plan__amount">¥0</span>
+          <span class="plan__cycle">/ 月</span>
+        </p>
+        <p class="plan__note">个人与试用</p>
+        <ul class="plan__features">
+          <li><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>1 个项目</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>最多 3 名成员</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>1 GB 存储空间</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>社区支持</span></li>
+        </ul>
+        <div class="plan__cta">
+          <a class="btn btn--primary" href="#" data-track="cta_click" data-plan="free">免费开始</a>
+        </div>
+      </article>
+
+      <!-- 专业版（主推） -->
+      <article class="plan plan--featured" aria-labelledby="plan-pro">
+        <span class="plan__tag">推荐</span>
+        <h3 class="plan__name" id="plan-pro">专业版</h3>
+        <p class="plan__price">
+          <span class="plan__amount">¥199</span>
+          <span class="plan__cycle">/ 月</span>
+        </p>
+        <p class="plan__note">按人计费，含 5 个席位</p>
+        <ul class="plan__features">
+          <li><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>不限项目数</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>最多 20 名成员</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>100 GB 存储空间</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>版本历史与数据导出</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>工作时间优先支持</span></li>
+        </ul>
+        <div class="plan__cta">
+          <a class="btn btn--primary" href="#" data-track="cta_click" data-plan="pro">升级到专业版</a>
+        </div>
+      </article>
+
+      <!-- 企业版 -->
+      <article class="plan" aria-labelledby="plan-ent">
+        <h3 class="plan__name" id="plan-ent">企业版</h3>
+        <p class="plan__price">
+          <span class="plan__amount" style="font-size:28px">按需报价</span>
+        </p>
+        <p class="plan__note">需要 SSO、审计与 SLA 的团队</p>
+        <ul class="plan__features">
+          <li><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>成员与项目数不限</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>单点登录（SSO）</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>审计日志与数据驻留</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>专属客户成功经理</span></li>
+          <li><svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>可用性 SLA</span></li>
+        </ul>
+        <div class="plan__cta">
+          <a class="btn btn--ghost" href="#" data-track="cta_click" data-plan="enterprise">联系销售</a>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="compare" aria-labelledby="compare-h">
+    <div class="container">
+      <div class="section-head">
+        <h2 id="compare-h">逐项对比</h2>
+        <p>按能力分组，点分组标题可折叠。这里是占位数据，最终以运营口径为准。</p>
+      </div>
+
+      <div class="compare__scroll">
+        <div class="compare__inner">
+
+          <div class="cgroup">
+            <button class="cgroup__toggle" type="button" aria-expanded="true" aria-controls="cg-collab" data-track="compare_toggle" data-group="collab">
+              <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              协作
+            </button>
+            <div class="cgroup__body" id="cg-collab">
+              <table class="ctable">
+                <thead><tr><th scope="col">能力</th><th scope="col">免费版</th><th scope="col">专业版</th><th scope="col">企业版</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">项目数</th><td>1 个</td><td>不限</td><td>不限</td></tr>
+                  <tr><th scope="row">成员数</th><td>3 人</td><td>20 人</td><td>不限</td></tr>
+                  <tr><th scope="row">访客链接</th><td class="no">无</td><td class="yes">有</td><td class="yes">有</td></tr>
+                  <tr><th scope="row">评论与 @ 提醒</th><td class="no">无</td><td class="yes">有</td><td class="yes">有</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="cgroup">
+            <button class="cgroup__toggle" type="button" aria-expanded="true" aria-controls="cg-data" data-track="compare_toggle" data-group="data">
+              <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              存储与版本
+            </button>
+            <div class="cgroup__body" id="cg-data">
+              <table class="ctable">
+                <thead><tr><th scope="col">能力</th><th scope="col">免费版</th><th scope="col">专业版</th><th scope="col">企业版</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">存储空间</th><td>1 GB</td><td>100 GB</td><td>不限</td></tr>
+                  <tr><th scope="row">单文件上限</th><td>25 MB</td><td>200 MB</td><td>2 GB</td></tr>
+                  <tr><th scope="row">版本历史</th><td>7 天</td><td>90 天</td><td>不限</td></tr>
+                  <tr><th scope="row">数据导出</th><td class="no">无</td><td class="yes">有</td><td class="yes">有</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="cgroup">
+            <button class="cgroup__toggle" type="button" aria-expanded="true" aria-controls="cg-sec" data-track="compare_toggle" data-group="security">
+              <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              安全与合规
+            </button>
+            <div class="cgroup__body" id="cg-sec">
+              <table class="ctable">
+                <thead><tr><th scope="col">能力</th><th scope="col">免费版</th><th scope="col">专业版</th><th scope="col">企业版</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">两步验证</th><td class="yes">有</td><td class="yes">有</td><td class="yes">有</td></tr>
+                  <tr><th scope="row">单点登录 SSO</th><td class="no">无</td><td class="no">无</td><td class="yes">有</td></tr>
+                  <tr><th scope="row">审计日志</th><td class="no">无</td><td class="no">无</td><td class="yes">有</td></tr>
+                  <tr><th scope="row">数据驻留</th><td class="no">无</td><td class="no">无</td><td class="yes">可选</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="cgroup">
+            <button class="cgroup__toggle" type="button" aria-expanded="true" aria-controls="cg-support" data-track="compare_toggle" data-group="support">
+              <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              支持
+            </button>
+            <div class="cgroup__body" id="cg-support">
+              <table class="ctable">
+                <thead><tr><th scope="col">能力</th><th scope="col">免费版</th><th scope="col">专业版</th><th scope="col">企业版</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">支持渠道</th><td>社区</td><td>邮件 + 在线客服</td><td>专属通道</td></tr>
+                  <tr><th scope="row">响应时效</th><td class="no">不承诺</td><td>1 个工作日</td><td>4 小时</td></tr>
+                  <tr><th scope="row">专属客户成功</th><td class="no">无</td><td class="no">无</td><td class="yes">有</td></tr>
+                  <tr><th scope="row">可用性 SLA</th><td class="no">无</td><td class="no">无</td><td class="yes">99.9%</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="faq container" aria-labelledby="faq-h">
+    <div class="section-head">
+      <h2 id="faq-h">常见问题</h2>
+    </div>
+    <div class="faq__list">
+
+      <details>
+        <summary>
+          可以随时取消吗？
+          <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </summary>
+        <p class="answer">可以。取消后当前计费周期结束前功能不变，周期结束后降回免费版，数据保留 90 天。</p>
+      </details>
+
+      <details>
+        <summary>
+          超出配额怎么计费？
+          <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </summary>
+        <p class="answer">超出成员数或存储空间时不会自动扣费，会先提示你升级；确认升级前不会产生额外费用。</p>
+      </details>
+
+      <details>
+        <summary>
+          发票怎么开？
+          <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </summary>
+        <p class="answer">专业版与企业版可在账户设置里申请增值税普通发票或专用发票，提交后 3 个工作日内开具。</p>
+      </details>
+
+      <details>
+        <summary>
+          数据可以导出吗？
+          <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </summary>
+        <p class="answer">专业版与企业版支持导出全部项目数据（含附件）。免费版需先升级。</p>
+      </details>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <div>
+      <p class="footer__text">需要 SSO、审计日志或定制合同？</p>
+      <p class="footer__meta">价格以销售口径为准。</p>
+    </div>
+    <a class="btn btn--ghost" style="width:auto" href="#" data-track="cta_click" data-plan="enterprise-footer">联系销售</a>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  /* 埋点桩（R6）。
+     本原型不发起任何网络请求——接入真实统计 SDK 时替换本函数体即可。
+     埋点失败不阻塞渲染与跳转：整个 track 包在 try/catch 里。 */
+  var queue = [];
+  function track(name, params) {
+    try {
+      queue.push({ name: name, params: params || {}, at: Date.now() });
+      if (window.console && console.debug) {
+        console.debug('[track]', name, params || {});
+      }
+    } catch (e) {
+      /* 埋点失败一律吞掉，不影响页面 */
+    }
+  }
+  window.__trackQueue = queue;
+
+  /* 页面曝光 */
+  track('page_view', { page: 'pricing', channel: document.referrer ? 'referral' : 'direct' });
+
+  /* 分组折叠（R2）。默认展开，禁用 JS 时内容依然可读（R5）。 */
+  var toggles = document.querySelectorAll('.cgroup__toggle');
+  Array.prototype.forEach.call(toggles, function (btn) {
+    btn.addEventListener('click', function () {
+      var body = document.getElementById(btn.getAttribute('aria-controls'));
+      if (!body) { return; }
+      var expanded = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+      body.hidden = expanded;
+      track('compare_toggle', { group: btn.getAttribute('data-group'), expanded: !expanded });
+    });
+  });
+
+  /* 行动按钮（R3）。本原型不接支付、不跳真实地址。 */
+  document.addEventListener('click', function (ev) {
+    var el = ev.target.closest ? ev.target.closest('[data-track="cta_click"]') : null;
+    if (!el) { return; }
+    track('cta_click', { plan: el.getAttribute('data-plan') });
+    if (el.getAttribute('href') === '#') {
+      ev.preventDefault();
+      alert('原型演示：这里会跳到「' + el.textContent.trim() + '」的下一步。');
+    }
+  });
+
+  /* FAQ 展开（R4）。用 details 原生元素，键盘与读屏天然可用，这里只补埋点。 */
+  Array.prototype.forEach.call(document.querySelectorAll('.faq details'), function (d) {
+    d.addEventListener('toggle', function () {
+      track('faq_toggle', { open: d.open });
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

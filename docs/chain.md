@@ -17,8 +17,14 @@
   context-to-prd         把你跟 AI 聊好的上下文，直接生成 PRD
           │
           ▼
-   prd-write ────→ grill-with-prd ────→ design-spec-prototyper
-     prd.md            prd.md（写回）         prototype.html
+     成文 prd.md
+     ├─ 从 requirement-clarify 进来 → 用 prd-write 成文（要复用产品基线时也必须走它）
+     └─ 从 context-to-prd 进来     → 它自己就是成文那一步
+     ★ prd-write 与 context-to-prd 产出的是同一个 prd.md，二选一，不要连着跑
+          │
+          ▼
+   grill-with-prd ────→ design-spec-prototyper
+     prd.md（写回）         prototype.html
                                                    │
                     ┌──────────────────────────────┴──────────┐
                     ▼                                         ▼
@@ -47,7 +53,7 @@ web-design-extractor            URL / 截图 → design.md，喂给 design-spec-
 |---|---|
 | 需求来源方给了一份 Word | `product-prd-extract`（首次使用会自动装好依赖；装不上就改为粘贴文本） |
 | 只有一句口头需求 | `requirement-clarify` |
-| 跟 AI 聊需求已经聊透了 | `context-to-prd` |
+| 跟 AI 聊需求已经聊透了，只差成文 | `context-to-prd`（与 `prd-write` **二选一**，别连着跑） |
 | 需求清楚，还要复用已有的产品规则 | `prd-write` |
 | 已经有一份 PRD，想挑毛病 | `grill-with-prd` |
 | 只有 PRD，要出评审原型 | `design-spec-prototyper` |
@@ -84,8 +90,14 @@ web-design-extractor            URL / 截图 → design.md，喂给 design-spec-
 | | |
 |---|---|
 | **输入** | 当前对话上下文 + 代码库现状 |
-| **产物** | `docs/prd/<feature-name>/prd.md` |
+| **产物** | `docs/prd/<feature-name>/prd.md`，**与 `prd-write` 完全同构**（都以 `prd-write/template.md` 的 0–10 节为骨架） |
 | **特点** | **不采访用户**——直接综合已掌握的信息成文 |
+| **独有产出** | 梳理模块划分与测试范围，写进第 10 节「交接说明」，**不写进第 7 节** |
+
+它与 `prd-write` 写的是**同一个文件**，不要连着跑。分工是：
+
+- 手上只有一段聊透的上下文、不需要对齐已有规范 → `context-to-prd`
+- 要复用 `docs/product/` 下的产品体验基线，或要写增量 PRD（复用 / 局部 / 候选 / 偏离四类）→ `prd-write`
 
 ---
 

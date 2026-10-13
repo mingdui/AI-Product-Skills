@@ -9,7 +9,9 @@
 - 模式：`incremental`（增量） | `full`（完整）
 - 状态：draft（草稿） | in review（评审中） | confirmed（已确认）
 - 负责人 / 评审人：
-- 关联产物：[design.md](design.md)、[prototype.html](prototype.html)、[demo.md](demo.md)（只列实际存在的文件）
+- 关联产物：[design.md](design.md)、[prototype.html](prototype.html)、[demo.md](demo.md)
+  ——只列**实际存在**的文件。PRD 通常先于原型产出，所以写 PRD 时这一行往往是空的：
+  这是正常的，**等原型做完再回填**，不要为了凑满而写不存在的文件，也不要留着不补
 
 ## 1. 执行摘要
 <谁需要什么变化、为什么是现在、预期影响。>

@@ -21,7 +21,8 @@
 .
 ├── .claude-plugin/          # 插件清单（marketplace.json + plugin.json）
 ├── .github/workflows/       # CI：乱码、个人路径、内部标识、skills 结构
-├── docs/                    # 安装说明、链路详解
+├── docs/                    # 安装说明、链路详解、一次真实运行记录
+├── examples/pricing-page/   # 那次运行的产物（PRD / 设计规格 / 可点原型）
 ├── skills/<name>/           # 11 个 skill，每个自包含
 │   ├── SKILL.md             # 必需
 │   ├── README.md            # 必需

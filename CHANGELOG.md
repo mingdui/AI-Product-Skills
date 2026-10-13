@@ -13,6 +13,40 @@
   变成了替换字符）。提交信息只能靠 `git commit --amend` + force push 修正，所以这道门禁
   是阻塞式的；同时覆盖 push（`before..sha`）、PR（`base..sha`）和新分支三种区间来源，
   拿不到区间时兜底只查 HEAD。
+- **`web-design-extractor` 补降级路径**。原先 `SKILL.md` 假设「有浏览器控制能力」，
+  没有为「只能读服务端返回的源码」这种情况规定做法——skill 会静默退化，而交付物
+  看起来和正常运行没有区别。现在要求必须写「转录边界」、令牌归属一律标 `[INFERRED]`、
+  断点与交互态标 `[UNKNOWN]`，并在交付说明里讲清补全证据的办法。
+  `references/design-md-template.md` 增加了对应的「转录边界」小节。
+- **`requirement-clarify` 与 `grill-with-prd` 补「自答模式」**。两者都是交互式的，
+  演示和回归时没法无人值守跑完。现在可以自己走完一轮，但约束是明确的：
+  涉及业务决策的仍须落成 `[UNKNOWN]` 并写明归属人，冲突与缺失照常报出来，
+  交付时「自答」的部分要单独列一遍，不能伪装成用户确认。
+- `design-spec-prototyper` 写明「只有规格没有图」时，构图证据由规格里的 DOM / 接口顺序承担，
+  并区分 `[OBSERVED]` 与 `[INFERRED]` 两种来源。
+- **`docs/walkthrough.md` + `examples/pricing-page/`** —— 一条链路的完整真实运行记录：
+  从一句口头需求，到 `clarify.md` / `prd.md` / `design.md` / `prototype.html` 四个产物，
+  含每一步的结论、验证方式与**没验到的部分**。
+  读它比读链路图快：`examples/pricing-page/prototype.html` 用浏览器直接打开就能点。
+
+### Changed
+
+- **统一 PRD 结构。** `context-to-prd` 原先自带一套模板（问题陈述 / 解决方案 / 用户故事 /
+  实现决策 / 测试决策 / 范围外 / 补充说明），与 `prd-write/template.md` 的 0–10 节完全不同，
+  却写同一个 `docs/prd/<feature-name>/prd.md`——读者会拿到两种结构的同名文档，
+  下游按哪套找章节没有答案。现在两者**共用 `template.md`**，差别只在过程
+  （是否强制读产品体验基线），并在 README、`docs/chain.md` 和各 skill 文档里统一说明
+  「**二选一，不要连着跑**」。
+- `context-to-prd` 独有的模块划分与测试范围，改为写进第 10 节「交接说明」而不是第 7 节——
+  第 7 节只放用户可验证的行为，实现决策不混进去。
+- `CLAUDE.md` 要求所有会写中文产物的 skill，在「交付前检查」里带一条 U+FFFD 扫描。
+  这个坑只在仓库里防住了一半：skill 在用户项目里产出的中文文档同样会中招，
+  而用户不知道要扫。
+
+### Fixed
+
+- `prd-write/template.md` 第 0 节的「关联产物」补上回填说明：PRD 通常先于原型产出，
+  这一行写 PRD 时本来就是空的，等原型做完再补——不要为凑满而写不存在的文件。
 
 ### Removed
 
