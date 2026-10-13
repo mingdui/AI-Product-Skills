@@ -31,7 +31,7 @@
 
 ## 二、每一步的输入与产物
 
-### 1. `/requirement-clarify pricing-page`
+### 1. `/requirement-clarify`
 
 **输入**（就一行）：
 
@@ -69,7 +69,7 @@
 
 ![clarify.md 产物：证据标注约定、已知事实表、目标角色与权限差异](../examples/pricing-page/clarify.png)
 
-### 2. `/prd-write pricing-page`
+### 2. `/prd-write`
 
 **输入**：`clarify.md`；查找 `docs/product/`（不存在 → 记「无产品基线」）
 
@@ -84,7 +84,7 @@
 
 ![prd.md 产物：文档信息、执行摘要、体验关系、问题与用户](../examples/pricing-page/prd.png)
 
-### 3. `/grill-with-prd pricing-page`
+### 3. `/grill-with-prd`
 
 **输入**：`prd.md`　**产物**：写回 `prd.md`（不产生新文件）
 
@@ -101,9 +101,9 @@
 
 这一步的价值不在改错别字，而在**把写作时看不出来的洞挖出来**——比如「主指标依赖一条尚未确认的链路」这种矛盾，单向写作几乎不可能自查到。
 
-### 4. `/web-design-extractor https://stripe.com/pricing`
+### 4. `/web-design-extractor`
 
-**输入**：参考站 URL　**产物**：`design.md`
+**输入**：`https://stripe.com/pricing`　**产物**：`design.md`
 
 用 Chrome CDP 无头模式采集：计算样式（按出现频次统计）、四档视口实测、全页分段截图。**两条证据线叠加使用**——计算样式给「用成了什么样」，截图给「谁更抢眼」。
 
@@ -124,7 +124,7 @@
 
 ![design.md 产物：间距与动效、布局架构，每条结论后跟证据标签](../examples/pricing-page/design.png)
 
-### 5. `/design-spec-prototyper pricing-page`
+### 5. `/design-spec-prototyper`
 
 **输入**：`design.md` + `prd.md`　**产物**：`prototype.html`（单文件，42.5 KB）
 
