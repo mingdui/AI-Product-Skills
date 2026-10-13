@@ -25,7 +25,18 @@ context-to-prd        把你跟 AI 聊好的上下文，直接生成 PRD
   grill-with-prd      扮演挑剔的工程师逐条压测，结论立刻写回原文
 ```
 
-你已有存量产品、规范开始不统一时，先跑一次 `product-experience-foundation`——详见下面折叠的一节。
+<details>
+<summary><strong>已经有存量产品？</strong>先跑一次 <code>product-experience-foundation</code>，把已有规则沉淀成产品级基线</summary>
+
+只要你已经有一个在跑的产品，都建议先跑一次——把已有的导航、术语、页面模式沉淀成产品级基线，
+C 端 / Admin 各自一份。
+
+跑过一次之后就不用再管了：`prd-write` 让功能 PRD 不必每次重讲一遍全局规则，各原型 skill
+也会照着它复用组件和模式。
+
+**什么时候该跑**：首版产品要立规矩、旧项目第一次接进来，或者你发现「同一个弹窗在三个功能里长得不一样」。
+
+</details>
 
 ### 二、生成高保真原型
 
@@ -44,12 +55,13 @@ URL / 截图 ──→ web-design-extractor ──→ design.md ──→ design
 提示词**，挑一个风格就能开始。
 
 **路子二：只有想法**——先用设计工具出稿，[完整清单、截图和示例提示词见这里](docs/design-tools.md)。
+
 拿到东西之后分两种情况：
 
 | 工具给了什么 | 怎么做 |
 |---|---|
-| **可交互的 HTML**<br>prototype-html / Open Design / ui-ux-pro-max / Figma Make / Axhub Make | **直接用**——它已经是可以点击的原型 |
-| **只有 UI 图片**<br>Google Stitch / OpenAI Image 2 | **走管线**：图片 → `web-design-extractor` → `design.md` → `design-spec-prototyper` |
+| **可交互的 HTML**<br>[prototype-html](https://github.com/vagerent/prototype-html) · [Open Design](https://open-design.ai/zh/) · [ui-ux-pro-max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) · [Figma AI Make](https://www.figma.com/) · [Axhub Make](https://axhub.im/make/) | **直接用**——它已经是可以点击的原型 |
+| **只有 UI 图片**<br>[Google Stitch](https://stitch.withgoogle.com/) · [OpenAI Image 2](https://developers.openai.com/api/docs/models/gpt-image-2) | **走管线**：图片 → `web-design-extractor` → `design.md` → `design-spec-prototyper` |
 
 ```
 图片 ──→ web-design-extractor ──→ design.md ──→ design-spec-prototyper ──→ prototype.html
@@ -69,19 +81,6 @@ URL / 截图 ──→ web-design-extractor ──→ design.md ──→ design
 |---|---|---|
 | **独立 HTML 文件** | `design-spec-prototyper`（默认） | 发给别人点、不依赖后端、评审会上直接演示 |
 | **你自己的前端项目里** | `pm-frontend-prototype` | **有前端项目时优先使用**——已有 React / Vue / HTML 项目，直接复用真实组件和设计变量，产出与正式入口隔离的原型路由 |
-
-<details>
-<summary><strong>已经有存量产品？</strong>先跑一次 <code>product-experience-foundation</code>，把已有规则沉淀成产品级基线</summary>
-
-**不管上面走哪条路子**，只要你已经有一个在跑的产品，都建议先跑一次——把已有的导航、术语、
-页面模式沉淀成产品级基线，C 端 / Admin 各自一份。
-
-它跟「原型放在哪」是**配合关系**：先立规矩，原型才知道该复用哪些组件、遵循哪些模式。跑过一次之后
-就不用再管了——`prd-write` 和各原型 skill 都会自动读它，功能 PRD 不必每次重讲一遍全局规则。
-
-**什么时候该跑**：首版产品要立规矩、旧项目第一次接进来，或者你发现「同一个弹窗在三个功能里长得不一样」。
-
-</details>
 
 ## 生成产物
 

@@ -25,8 +25,20 @@ context-to-prd        context you already worked out with AI → a PRD
   grill-with-prd      plays a demanding engineer; every answer written back into the file
 ```
 
-If you already have a product in flight and its patterns are starting to drift, run
-`product-experience-foundation` first — see the collapsed section below.
+<details>
+<summary><strong>Already have a product?</strong> Run <code>product-experience-foundation</code> once to settle the existing rules into a baseline</summary>
+
+If you already have a product in flight, it is worth running it once — capturing the existing
+navigation, terminology and page patterns into a product-level baseline, maintained separately for
+C-end and Admin.
+
+Once it has run you don't have to think about it again: `prd-write` stops restating global rules in
+every feature PRD, and the prototype skills follow it when reusing components and patterns.
+
+**When to run it**: a first version that needs rules set, onboarding a legacy project, or when you
+notice the same modal looks different in three different features.
+
+</details>
 
 ### 2. Generating a high-fidelity prototype
 
@@ -47,12 +59,14 @@ No reference site yet? [Here are a few design reference sites](docs/design-refer
 you a **style direction and a prompt**, not a finished design. Pick one and go.
 
 **Route 2 — you only have the idea.** Have a design tool produce something first — [full list,
-screenshots and a sample prompt here](docs/design-tools.md). What you get back falls into two cases:
+screenshots and a sample prompt here](docs/design-tools.md).
+
+What you get back falls into two cases:
 
 | What the tool gave you | What to do |
 |---|---|
-| **Clickable HTML**<br>prototype-html / Open Design / ui-ux-pro-max / Figma Make / Axhub Make | **Use it as-is** — it is already a clickable prototype |
-| **UI images only**<br>Google Stitch / OpenAI Image 2 | **Run the pipeline**: image → `web-design-extractor` → `design.md` → `design-spec-prototyper` |
+| **Clickable HTML**<br>[prototype-html](https://github.com/vagerent/prototype-html) · [Open Design](https://open-design.ai/zh/) · [ui-ux-pro-max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) · [Figma AI Make](https://www.figma.com/) · [Axhub Make](https://axhub.im/make/) | **Use it as-is** — it is already a clickable prototype |
+| **UI images only**<br>[Google Stitch](https://stitch.withgoogle.com/) · [OpenAI Image 2](https://developers.openai.com/api/docs/models/gpt-image-2) | **Run the pipeline**: image → `web-design-extractor` → `design.md` → `design-spec-prototyper` |
 
 ```
 image ─→ web-design-extractor ─→ design.md ─→ design-spec-prototyper ─→ prototype.html
@@ -73,23 +87,6 @@ Independent of where the design came from. Two options:
 |---|---|---|
 | **A standalone HTML file** | `design-spec-prototyper` (default) | Sending it to someone, demoing at a review, no backend needed |
 | **Inside your own frontend project** | `pm-frontend-prototype` | **Prefer this when you have a frontend project** — you already have a React / Vue / HTML project, so reuse the real components and design tokens, producing prototype routes isolated from production |
-
-<details>
-<summary><strong>Already have a product?</strong> Run <code>product-experience-foundation</code> once to settle the existing rules into a baseline</summary>
-
-**Whichever route you took above**, if you already have a product in flight it is worth running it
-first — capturing the existing navigation, terminology and page patterns into a product-level
-baseline, maintained separately for C-end and Admin.
-
-It pairs with "where the prototype lives": **settle the rules first**, and only then does the prototype
-know which components to reuse and which patterns to follow. Once it has run you don't have to think
-about it again — `prd-write` and the prototype skills read it automatically, so feature PRDs never
-restate global rules.
-
-**When to run it**: a first version that needs rules set, onboarding a legacy project, or when you
-notice the same modal looks different in three different features.
-
-</details>
 
 ## Generated artifacts
 
