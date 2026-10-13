@@ -110,7 +110,7 @@ Nothing to copy by hand.
 | `product-experience-foundation` | A first version, onboarding a legacy project, or page patterns starting to diverge. Settle the product rules once, reuse them after |
 | `web-design-extractor` | You have a competitor URL or screenshot to turn into `design.md`, separating `[OBSERVED]` / `[INFERRED]` / `[UNKNOWN]` |
 | `pm-frontend-prototype` | You already have a frontend project and want the prototype to live inside it, reusing real components and design tokens. Replaces `design-spec-prototyper` |
-| `prototype-html` | You want a single-file prototype with UI on the left and annotations on the right, linked by highlighted connectors. **Third-party** (Apache-2.0), see [THIRD-PARTY.md](THIRD-PARTY.md) |
+| `prototype-html` | You want a single-file prototype with UI on the left and annotations on the right, linked by highlighted connectors |
 
 Each skill's boundaries and details are in its own `skills/<name>/README.md`; how the chain connects is in [docs/chain.md](docs/chain.md).
 

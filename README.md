@@ -104,7 +104,7 @@ URL / 截图 ──→ web-design-extractor ──→ design.md ──→ design
 | `product-experience-foundation` | 首版产品、旧项目第一次接进来，或页面体验开始不一致。沉淀产品级规则，跑一次后续自动复用 |
 | `web-design-extractor` | 有竞品站链接或截图，要提取成 `design.md`。区分 `[OBSERVED]` / `[INFERRED]` / `[UNKNOWN]` |
 | `pm-frontend-prototype` | 你已有前端项目，想让原型直接长在项目里、复用真实组件和设计变量。替换 `design-spec-prototyper` |
-| `prototype-html` | 想要「界面 + 说明」左右分栏、带连线高亮的单文件原型。**第三方作品**（Apache-2.0），见 [THIRD-PARTY.md](THIRD-PARTY.md) |
+| `prototype-html` | 想要「界面 + 说明」左右分栏、带连线高亮的单文件原型 |
 
 每个 skill 的边界和细节见各自的 `skills/<name>/README.md`；链路怎么衔接见 [docs/chain.md](docs/chain.md)。
 
