@@ -189,29 +189,55 @@ web-design-extractor            URL / 截图 → design.md，喂给 design-spec-
 
 ## 产物总表
 
+按**阶段**分组，最后另有一项跨功能的产品级基线。
+**每组单独看，别横着对账**——任何一次运行都只产出其中一部分，差额不是缺失。
+
+### 需求侧
+
+都在 `docs/prd/<feature-name>/` 下。
+
 | 文件 | 产出者 | 消费者 |
 |---|---|---|
-| `docs/prd/<f>/prd.md` | `product-prd-extract` / `context-to-prd` / `prd-write` | `grill-with-prd`、各原型 skill、`acceptance-checklist` |
-| `docs/prd/<f>/clarify.md` | `requirement-clarify` | `prd-write`、`context-to-prd` |
-| `docs/prd/<f>/design.md` | `web-design-extractor` 或人工 | `design-spec-prototyper` |
-| `docs/prd/<f>/prototype.html` | `design-spec-prototyper`、`prototype-html` | `acceptance-checklist`、人（交给研发） |
-| `docs/prd/<f>/demo.md` | `pm-frontend-prototype`（**仅此一路**，且可选） | 人（交给研发） |
-| `docs/prd/<f>/acceptance.md` | `acceptance-checklist` | 人（走查） |
-| `docs/prd/<f>/images/` | `product-prd-extract` | 人（评审） |
-| `docs/product/<p>/` | `product-experience-foundation` | `prd-write`、各原型 skill |
+| `clarify.md` | `requirement-clarify` | `prd-write`、`context-to-prd` |
+| `prd.md` | `product-prd-extract` / `context-to-prd` / `prd-write` | `grill-with-prd`、各原型 skill、`acceptance-checklist` |
+| `images/` | `product-prd-extract` | 人（评审） |
 
-> **这张表不是「一次运行要产出的清单」。** 别对照它数自己少了几个文件——
-> 每次只产出当前路线需要的那些：`clarify.md` / `prd.md` 属需求侧，
-> `design.md` / `prototype.html` / `demo.md` 属原型侧，`acceptance.md` 要等研发提测，
-> `images/` 只有 Word 路线才有。**没有哪次运行会把 8 个都产出来。**
+> `images/` 只有 Word 路线才有；`clarify.md` 只有走过采访才有。都没走也正常。
 
-> **`prototype.html` 与 `demo.md` 互斥。** 原型有两个落点，一次只走一条：
+### 原型侧
+
+都在 `docs/prd/<feature-name>/` 下。
+
+| 文件 | 产出者 | 消费者 |
+|---|---|---|
+| `design.md` | `web-design-extractor` 或人工 | `design-spec-prototyper`、`pm-frontend-prototype` |
+| `prototype.html` | `design-spec-prototyper`、`prototype-html` | `acceptance-checklist`、人（交给研发） |
+| `demo.md` | `pm-frontend-prototype`（可选） | 人（交给研发） |
+
+> **原型有两个互斥的落点，一次只走一条：**
 >
 > - 要**独立单文件 HTML** → `design-spec-prototyper`，产 `prototype.html`
 > - 要**长在你自己的前端项目里** → `pm-frontend-prototype`，原型落在项目源码中，
 >   另记一份 `demo.md` 当交接标记（可选）
 >
-> 走了前一条就不会有 `demo.md`，这不是漏了，是这条路本来就不产它。
+> **走了前一条就不会有 `demo.md`——这不是漏了，是这条路本来就不产它。**
+> `design.md` 也可以没有：纯规格驱动或直接用工具产出的 HTML 时，它不一定是必经产物。
+
+### 验收侧
+
+| 文件 | 产出者 | 消费者 |
+|---|---|---|
+| `docs/prd/<feature-name>/acceptance.md` | `acceptance-checklist` | 人（走查） |
+
+> 要等研发提测之后才写。需求刚理完时它不存在，是对的。
+
+### 产品级（跨功能，不在功能目录下）
+
+| 位置 | 产出者 | 消费者 |
+|---|---|---|
+| `docs/product/<project-name>/` | `product-experience-foundation` | `prd-write`、各原型 skill |
+
+> 跑一次之后长期复用，不属于任何单个功能——跑过就不必再管。
 
 约定：**目录已存在则复用，同名文件不覆盖**。缺 `prd.md` 时，`acceptance-checklist` 会提示你先补
 PRD，而不是凭原型反推需求并当成事实。
