@@ -14,7 +14,7 @@ jobs:
     name: 发布前自检
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
 
       # 门禁 1：U+FFFD 乱码。
       # Windows + Git Bash 的 heredoc 会把中文静默写成替换字符，不报错，直接进历史。
@@ -45,29 +45,33 @@ jobs:
           echo "✅ 无个人绝对路径"
 
       # 门禁 3：内部标识（哨兵列表）。
-      # 哨兵词本身不入库——从仓库变量 INTERNAL_SENTINELS 读取（逗号分隔）。
-      # 未配置该变量时本门禁跳过，不阻塞。
+      # 哨兵列表的唯一真相源是 ming-qa 的 ci.yml——这里**不存副本**：
+      # 存副本会漂移，而且会把哨兵词本身写进本仓库。
+      # 取不到时降级为 warning 并跳过，不阻塞构建。
       - name: 门禁 3 — 内部标识扫描
-        env:
-          SENTINELS: ${{ vars.INTERNAL_SENTINELS }}
         run: |
           set -euo pipefail
-          if [ -z "${SENTINELS:-}" ]; then
-            echo "::notice::未配置仓库变量 INTERNAL_SENTINELS，跳过本门禁。"
+          SRC="https://raw.githubusercontent.com/mingdui/ming-qa/main/.github/workflows/ci.yml"
+          if ! curl -fsSL "$SRC" -o /tmp/truth.yml; then
+            echo "::warning::取不到哨兵真相源（$SRC），跳过本门禁。"
             exit 0
           fi
-          PATTERN=$(printf '%s' "$SENTINELS" | tr ',' '|')
-          if grep -rnIE "$PATTERN" . --exclude-dir=.git --exclude-dir=node_modules; then
+          SENTINELS=$(grep -m1 -oE "SENTINELS='[^']+'" /tmp/truth.yml | sed "s/^SENTINELS='//; s/'\$//")
+          if [ -z "$SENTINELS" ]; then
+            echo "::warning::未能从真相源解析出 SENTINELS，跳过本门禁。"
+            exit 0
+          fi
+          if grep -rnIE "$SENTINELS" . --exclude-dir=.git --exclude-dir=node_modules; then
             echo "::error::命中内部标识哨兵词，请替换为通用表述。"
             exit 1
           fi
-          echo "✅ 无内部标识命中"
+          echo "✅ 无内部标识命中（哨兵取自 ming-qa 的 ci.yml）"
 
   structure:
     name: 仓库结构校验
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7.0.1
 
       # 每个 skill 必须是 skills/<name>/ 下的独立目录，含 SKILL.md，
       # 且 frontmatter 的 name 与目录名一致——否则 agent 的发现机制会错位。
