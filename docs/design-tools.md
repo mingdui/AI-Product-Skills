@@ -31,7 +31,7 @@
 | 工具 | 链接 | 说明 |
 |---|---|---|
 | **Google Stitch** | <https://stitch.withgoogle.com/> | 谷歌出品，产出界面设计图 |
-| **OpenAI Image 2** | — | 生图模型，产出界面设计图 |
+| **OpenAI Image 2** | <https://developers.openai.com/api/docs/models/gpt-image-2> | OpenAI 生图模型，产出界面设计图。API 里叫 `gpt-image-2`，产品里叫 ChatGPT Images 2.0，在 ChatGPT 里直接用 |
 
 这两个直接打开链接就能用。前面五个里，`ui-ux-pro-max` 和 `Axhub Make` 需要装一下：
 
@@ -46,8 +46,15 @@
 npx -y @axhub/make@latest
 ```
 
-> 这七个都只是「出稿」。**稿子出来之后统一从 `web-design-extractor` 进**，产出有证据支撑的
-> `design.md`，再接 `design-spec-prototyper` 变成可点击的 `prototype.html`。
+> **拿到东西之后分两种走法：**
+>
+> - **产出 HTML 的那五个**——稿子出来就是能点的原型，**直接用**，不必重走管线。
+>   拿规格重新生成一遍，只会比原稿更差。
+> - **只产出图片的那两个**——从 `web-design-extractor` 进，产出有证据支撑的 `design.md`，
+>   再接 `design-spec-prototyper` 变成可点击的 `prototype.html`。
+>
+> 不管走哪条，都建议把设计特征固化成 `design.md`——它是**持续沉淀**，让下一个迭代和下一个
+> AI 会话还记得你的设计规范，而不是每次重新猜。
 
 ### 一个示例提示词
 
@@ -91,11 +98,6 @@ npx -y @axhub/make@latest
 
 ## 风格参考网站
 
-做法 A 要找参考站点时，从这里挑。三个站点都是给出风格提示词或设计规格，不是设计稿本身——
-拿到风格方向后，仍然要经过 `web-design-extractor` 提取成有证据支撑的 `design.md`。
+已独立成篇 → **[风格参考网站](design-references.md)**（站点列表、截图和使用注意）。
 
-| 站点 | 链接 |
-|---|---|
-| Design Prompts | <https://www.designprompts.dev/> |
-| DesignMD | <https://www.designmd.co/> |
-| designmd.ai | <https://designmd.ai/> |
+做法 A 用得上，做法 B 不需要。

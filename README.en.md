@@ -13,55 +13,82 @@ AI workflows for product managers: twelve skills covering the whole path from "w
 Someone handed you a Word document, or said a paragraph in a meeting — and you need it to become a PRD engineering can act on.
 
 ```
-product-prd-extract   Word (.docx) PRD → structured prd.md   ┐
-requirement-clarify   one-line spoken request → clarify.md    ├ pick one entry
-context-to-prd        already discussed → straight to a PRD   ┘
+Pick one entry point:
+
+product-prd-extract   Word (.docx) PRD → structured prd.md
+requirement-clarify   one-line spoken request → clarify.md
+context-to-prd        context you already worked out with AI → a PRD
+
         ↓
    prd-write          write a new prd.md or revise an existing one, reusing the product baseline
         ↓
   grill-with-prd      plays a demanding engineer; every answer written back into the file
 ```
 
-**For a first version, when onboarding a legacy project, or once C-end / Admin page patterns start to
-diverge**, run `product-experience-foundation` first to capture the product-level rules. After that,
-`prd-write` and the prototype skills read them automatically, so feature PRDs never restate global rules.
+If you already have a product in flight and its patterns are starting to drift, see
+[When you already have a product](#when-you-already-have-a-product) below.
 
 ### 2. Getting the page built before it reaches engineering
 
-The PRD is done, but prose alone won't settle what the page actually looks like. There are two ways here —
-**they differ only in where the design comes from**.
+The PRD is done, but prose alone won't settle what the page actually looks like. Two **independent**
+choices here: **where the design comes from**, and **where the prototype lives**.
 
-**Route A — you have a reference site.** Use a competitor or reference site as the design basis.
+#### Where the design comes from
+
+**Route 1 — you have a reference site.** Use a competitor or reference site as the design basis.
 
 ```
 URL / screenshot ─→ web-design-extractor ─→ design.md ─→ design-spec-prototyper ─→ prototype.html
-                    observed vs inferred      the spec    spec is the single source    clickable,
+                    observed vs inferred      the spec    spec + image together        clickable,
                                                                                        reviewable
 ```
 
-**Route B — you only have the idea.** Have a design tool produce the mockup first, then join the same
-flow with the mockup as input.
+No reference site yet? [Here are a few design reference sites](docs/design-references.md) — they hand
+you a **style direction and a prompt**, not a finished design. Pick one and go.
+
+**Route 2 — you only have the idea.** Have a design tool produce something first — [full list,
+screenshots and a sample prompt here](docs/design-tools.md). What you get back falls into two cases:
+
+| What the tool gave you | What to do |
+|---|---|
+| **Clickable HTML**<br>prototype-html / Open Design / ui-ux-pro-max / Figma Make / Axhub Make | **Use it as-is.** It is already a clickable prototype — regenerating it from a spec would only produce something worse than the original |
+| **UI images only**<br>Google Stitch / OpenAI Image 2 | **Run the pipeline**: image → `web-design-extractor` → `design.md` → `design-spec-prototyper` |
 
 ```
-design tool ─→ mockup ─→ web-design-extractor ─→ design.md ─→ design-spec-prototyper
-                                                                     ↓
-                                                               prototype.html
+image ─→ web-design-extractor ─→ design.md ─→ design-spec-prototyper ─→ prototype.html
+                                  ↑
+                     durable record: later iterations don't have to re-guess the design rules
 ```
 
-Common tools — [full list, screenshots and a sample prompt here](docs/design-tools.md):
+**`design.md` is a durable record, not a step you must pass through every time.** It pins down brand
+tokens and component rules so the next iteration — and the next AI session — still knows what your
+design system is. So **even when you use the tool's HTML directly, it is worth writing a `design.md`** —
+otherwise the rules you settled on are lost the moment the conversation ends.
 
-- **Interactive prototype output** —
-  [prototype-html](https://github.com/vagerent/prototype-html) ·
-  [Open Design](https://open-design.ai/zh/) ·
-  [ui-ux-pro-max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) ·
-  [Figma AI Make](https://www.figma.com/) ·
-  [Axhub Make](https://axhub.im/make/)
-- **UI images only** —
-  [Google Stitch](https://stitch.withgoogle.com/) · OpenAI Image 2
+#### Where the prototype lives
 
-Both routes produce **the same artifact format**, so what you bring to review looks the same. To build
-the prototype inside **your own frontend project** instead — reusing real components and design tokens,
-isolated from production routes — swap the last step for `pm-frontend-prototype`.
+Independent of where the design came from. Two options:
+
+| Where | What to use | Best for |
+|---|---|---|
+| **A standalone HTML file** | `design-spec-prototyper` (default) | Sending it to someone, demoing at a review, no backend needed |
+| **Inside your own frontend project** | `pm-frontend-prototype` | You already have a React / Vue / HTML project — **reuse the real components and design tokens**, producing prototype routes isolated from production |
+
+**If you have a frontend project, prefer the second.** The prototype then looks like the real product,
+and review won't end in "the demo looked great, why doesn't the build?"
+
+#### When you already have a product
+
+Since you already have a frontend project and a history of pages, it is worth **running
+`product-experience-foundation` first** — capturing the existing navigation, terminology and page
+patterns into a product-level baseline, maintained separately for C-end and Admin.
+
+It pairs with the choice above: **settle the rules first**, and only then does the prototype know which
+components to reuse and which patterns to follow. Once it has run you don't have to think about it again —
+`prd-write` and the prototype skills read it automatically, so feature PRDs never restate global rules.
+
+**When to run it**: a first version that needs rules set, onboarding a legacy project, or when you
+notice the same modal looks different in three different features.
 
 ## What you get
 
@@ -130,12 +157,6 @@ What each of the twelve skills does, and when not to reach for it, is in [docs/s
 - **Not a design tool** — it does not replace Figma or Axure. The output is **HTML for review**, not design source files.
 - **Not automated testing** — `acceptance-checklist` produces a **product acceptance** checklist
   (user-observable outcomes), not test cases (implementation branch coverage).
-- **`prototype-to-product` does write production code**, but only for local, low-risk changes that
-  existing components and routes can absorb. When the change touches API contracts, data models,
-  permissions, or spans modules, it hands off to OpenSpec, Superpowers, or whatever governance flow
-  your project uses — it does not edit business code behind that flow's back.
-- **It will not decide for you** — every skill marks unknowns as `[UNKNOWN]` with an owner rather than
-  inventing an answer.
 
 ## License
 

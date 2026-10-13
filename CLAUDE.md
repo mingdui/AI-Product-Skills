@@ -144,8 +144,8 @@ git config --local user.email   # 每次提交前回读确认
 收录任何第三方作品前，先确认对方 **LICENSE**：
 
 - 有许可（如 Apache-2.0 / MIT）→ 保留许可副本 + 在 [THIRD-PARTY.md](THIRD-PARTY.md) 写明来源与修改情况
-- **没有 LICENSE → 默认保留全部权利，一个字都不能拷**。可以借鉴思路，但必须独立重写，并在
-  THIRD-PARTY.md 写明「仅借鉴思路、未复制任何文件」
+- **没有 LICENSE → 默认保留全部权利，一个字都不能拷**。可以借鉴思路（思路不受著作权保护），
+  但必须独立重写。**这种情况不需要在 THIRD-PARTY.md 留痕**——没有署名义务，写多了是噪音
 
 ### `prototype-html` 是第三方，不要顺手改
 

@@ -14,7 +14,7 @@
 
   product-prd-extract    Word（.docx）PRD → 结构化 prd.md
   requirement-clarify    一句话口头需求 → clarify.md
-  context-to-prd         已经聊清楚了 → 直接成文
+  context-to-prd         把你跟 AI 聊好的上下文，直接生成 PRD
           │
           ▼
    prd-write ────→ grill-with-prd ────→ design-spec-prototyper
@@ -48,7 +48,7 @@ web-design-extractor            URL / 截图 → design.md，喂给 design-spec-
 |---|---|
 | 需求来源方给了一份 Word | `product-prd-extract`（首次使用会自动装好依赖；装不上就改为粘贴文本） |
 | 只有一句口头需求 | `requirement-clarify` |
-| 已经聊清楚了，代码库也摸过 | `context-to-prd` |
+| 跟 AI 聊需求已经聊透了 | `context-to-prd` |
 | 需求清楚，还要复用已有的产品规则 | `prd-write` |
 | 已经有一份 PRD，想挑毛病 | `grill-with-prd` |
 | 只有 PRD，要出评审原型 | `design-spec-prototyper` |

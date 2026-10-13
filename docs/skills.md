@@ -9,7 +9,7 @@
 |---|---|
 | `product-prd-extract` | 需求来源方给的是 Word（`.docx`）。转成结构化 markdown，缺失信息标 `[UNKNOWN]`。**唯一需要 Node ≥ 20 的 skill**，首次使用时 agent 会自己装好依赖 |
 | `requirement-clarify` | 只有一句口头需求，边界没问清。一次问一个问题，专门追问「明确不做」 |
-| `context-to-prd` | 已经聊清楚了、代码库也摸过。直接固化成 PRD，不再反问 |
+| `context-to-prd` | 跟 AI 聊需求已经聊透了。把那段上下文直接固化成 PRD，不再反问 |
 
 ## 主链
 
