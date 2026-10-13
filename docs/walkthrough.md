@@ -4,6 +4,7 @@
 - 演示题材：给一个 SaaS 产品做**定价页**，参考 Stripe
 - 产物：[`examples/pricing-page/`](../examples/pricing-page/)
 - 想直接看结果：用浏览器打开 [`examples/pricing-page/prototype.html`](../examples/pricing-page/prototype.html)
+- 四个产物各有一张实拍图，都在同一个目录下；下面每一步都配了
 
 > 产物里的价格与权益是**占位数据**，不代表任何真实产品。
 
@@ -41,6 +42,11 @@
 - **页面终点**定为「留资」，不是「发起转化」
 - 留下 8 条 `[UNKNOWN]`，每条带归属人。其中 #1（表单落点）直接阻塞表单提交
 
+[`clarify.md`](../examples/pricing-page/clarify.md) 实拍——顶部是证据标注约定与「本文件不含自答项」声明，
+下面按五类信息分节：
+
+![clarify.md 产物：证据标注约定、已知事实表、目标角色与权限差异](../examples/pricing-page/clarify.png)
+
 ### 2. `/prd-write pricing-page`
 
 **输入**：`clarify.md`；查找 `docs/product/`（不存在 → 记「无产品基线」）
@@ -50,6 +56,11 @@
 模式选 `full` 而不是 `incremental`，理由是：仓库无体验基线可增量对照，且本次同时确立定价模型与商业定位，问题、用户、策略、指标四者都需要独立讲清。
 
 价格与权益表写在第 5 节，让 PRD 自成闭环。
+
+[`prd.md`](../examples/pricing-page/prd.md) 实拍——第 0 节「文档信息」把模式选择的理由也写在里面
+（为什么是 `full` 而不是 `incremental`），下游审查时不用猜：
+
+![prd.md 产物：文档信息、执行摘要、体验关系、问题与用户](../examples/pricing-page/prd.png)
 
 ### 3. `/grill-with-prd pricing-page`
 
@@ -85,6 +96,12 @@
 
 **可迁移的只有视觉语言**（排版比例、色彩、圆角、阴影、间距、响应式行为），信息架构和 CTA 策略必须自己设计。
 
+[`design.md`](../examples/pricing-page/design.md) 实拍——每一条结论后面都跟着证据标签
+（`[OBSERVED: URL]` / `[OBSERVED: SCREENSHOT]` / `[INFERRED]` / `[UNKNOWN]`），
+一眼能看出哪些能当约束用、哪些只是默认值：
+
+![design.md 产物：间距与动效、布局架构，每条结论后跟证据标签](../examples/pricing-page/design.png)
+
 ### 5. `/design-spec-prototyper pricing-page`
 
 **输入**：`design.md` + `prd.md`　**产物**：`prototype.html`（单文件，42.5 KB）
@@ -103,17 +120,28 @@
 
 字体来源：`system`。参考站的 `sohne-var` 是需授权的商业字体，不可引用；本页是中文内容，中文由 `Noto Sans SC` 承载，拉丁字形与参考站不同——这一点写在 `design.md` 的重建规则里，也写在原型的交付说明里。
 
+实拍——四档并排、月付 / 年付分段控件、每张卡下的「预约演示」CTA。
+配色、圆角、按钮形态来自 `design.md` 的视觉令牌，**分区顺序来自 PRD，不是参考站**：
+
+![prototype.html 实拍：定价页，四档方案与月付/年付切换](../examples/pricing-page/prototype.png)
+
 ---
 
 ## 三、产物
 
 ```text
 examples/pricing-page/
-├── clarify.md        6.7 KB
-├── prd.md            15.7 KB
-├── design.md         20 KB
-└── prototype.html    42.5 KB
+├── clarify.md        6.7 KB      ┐
+├── clarify.png       320 KB      ┘ 上面第 1 节的实拍
+├── prd.md           15.7 KB      ┐
+├── prd.png           338 KB      ┘ 第 2 节的实拍
+├── design.md        20.0 KB      ┐
+├── design.png        559 KB      ┘ 第 4 节的实拍
+├── prototype.html   42.5 KB      ┐
+└── prototype.png     267 KB      ┘ 第 5 节的实拍
 ```
+
+四张图都是产物的**实拍**，没有做任何裁剪或修饰——看到的就是当时交付的那份东西。
 
 ---
 
