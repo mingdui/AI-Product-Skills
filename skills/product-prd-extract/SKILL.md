@@ -73,6 +73,12 @@ npm --prefix "<本 skill 目录>/scripts" install
 
 ## feature-name 命名规则
 
+> **这一节是本仓库 feature-name 规则的权威源。** 其他 skill 引用这里，不再另抄一份——
+> 抄一份就会漂一次。
+>
+> （本文件不链到仓库的 `docs/`：skill 被单独安装出去时那个路径不存在。
+> 链路口径写在 `docs/chain.md` 的「跨文档约定」里，那是给使用者看的。）
+
 `<feature-name>` 决定目录名，**强制纯英文 kebab-case**：
 
 | 规则 | ✅ | ❌ |

@@ -16,11 +16,14 @@
 
 | # | 命令 | 产物 |
 | --- | --- | --- |
-| 1 | `/requirement-clarify pricing-page` | `clarify.md` |
-| 2 | `/prd-write pricing-page` | `prd.md` |
-| 3 | `/grill-with-prd pricing-page` | 写回 `prd.md` |
+| 1 | `/requirement-clarify 给一个 SaaS 产品做定价页，参考 Stripe` | `clarify.md` |
+| 2 | `/prd-write` | `prd.md` |
+| 3 | `/grill-with-prd` | 写回 `prd.md` |
 | 4 | `/web-design-extractor https://stripe.com/pricing` | `design.md` |
-| 5 | `/design-spec-prototyper pricing-page` | `prototype.html` |
+| 5 | `/design-spec-prototyper` | `prototype.html` |
+
+**功能名只在第 1 步出现一次，而且是它自己从描述里取的**——`pricing-page` 这个名字，
+后面四步没有一步需要你手动传：看到 `docs/prd/pricing-page/` 这个目录，就知道该读哪。
 
 五步、四个产物，全部落在同一个目录 `docs/prd/pricing-page/`。
 
