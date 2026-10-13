@@ -18,7 +18,7 @@
 //   <outDir>/shot-<宽>.png         截图
 
 import { writeFileSync, mkdirSync, mkdtempSync, rmSync, existsSync } from 'node:fs';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -169,8 +169,23 @@ async function runCdp(exe, url, outDir) {
     '--disable-features=Translate', 'about:blank',
   ], { stdio: 'ignore' });
 
-  const cleanup = () => { try { child.kill(); } catch {} try { rmSync(profile, { recursive: true, force: true }); } catch {} };
+  // Windows 上 child.kill() 杀不掉 Chrome 的进程树——实测会留下 headless 进程占着调试端口，
+  // 下次跑就撞端口。必须用 taskkill /T 连子树一起收。
+  let cleaned = false;
+  const cleanup = () => {
+    if (cleaned) return;
+    cleaned = true;
+    try {
+      if (process.platform === 'win32' && child.pid) {
+        spawnSync('taskkill', ['/PID', String(child.pid), '/T', '/F'], { stdio: 'ignore' });
+      } else {
+        child.kill('SIGTERM');
+      }
+    } catch { /* 已经退了 */ }
+    try { rmSync(profile, { recursive: true, force: true }); } catch { /* 临时目录留着自己会被清 */ }
+  };
   process.on('exit', cleanup);
+  process.on('SIGINT', () => { cleanup(); process.exit(130); });
 
   let wsUrl = null;
   for (let i = 0; i < 40 && !wsUrl; i++) {
