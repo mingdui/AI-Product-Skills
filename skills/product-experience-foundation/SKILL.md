@@ -62,3 +62,11 @@ docs/product/<project-name>/
 - 仍待产品确认的角色、信息架构或领域规则。
 
 后续使用 `pm-frontend-prototype`、`web-design-extractor` 或 `design-spec-prototyper` 时，先读取对应端的基线；缺少基线时，不得假装它已经存在。
+
+## 交付前检查
+
+- [ ] 每份基线文件都标明了它覆盖的产品端（`c-end/` 或 `admin/`）
+- [ ] 领域术语、品牌与跨端业务状态只在共享层写一份，没有在两端各写一遍
+- [ ] 每条规则都能追到来源（现有页面 / 已确认决策 / 竞品证据），推断项有标注
+- [ ] 候选晋升有依据——被几个已确认功能采用过，不是拍脑袋升的
+- [ ] 写完扫一遍中文乱码：`grep -rnI $'\xef\xbf\xbd' docs/product/`

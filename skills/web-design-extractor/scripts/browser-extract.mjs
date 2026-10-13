@@ -7,17 +7,24 @@
 // 依赖：零。按能用的最强的引擎依次尝试——
 //   ① 项目里已有 playwright  → 用它（代码最少）
 //   ② 机器上有 Chrome/Edge   → 用 CDP（Node ≥ 22 内置 fetch + WebSocket）
-//   ③ 都没有                 → 退出码 3，让上层退回源码路线并标注「转录边界」
+//   ③ 都没有                 → 退出码 3，让上层退回源码路线并标注「证据边界」
 //
 // 用法：
-//   node browser-extract.mjs <url> <outDir> [--project <项目根>]
+//   node browser-extract.mjs <url> <outDir> [选项]
+//
+//   选项
+//     --project <目录>   从这里解析 playwright（默认当前目录）
+//     --no-playwright    跳过 playwright，强制走 CDP
+//     --slice [px]       额外按固定高度分段截图（默认 900），并给出每段文字索引
+//     --read <outDir>    不采集，只把已有结果打成可读摘要（别把 JSON 整个读进上下文）
 //
 // 产物：
 //   <outDir>/computed-<宽>.json    计算样式，按取值频次排序
 //   <outDir>/breakpoints.json      四档视口的差异
-//   <outDir>/shot-<宽>.png         截图
+//   <outDir>/shot-<宽>.png         截图（全页 + 各档视口）
+//   <outDir>/slices/               分段截图（用了 --slice 才有）
 
-import { writeFileSync, mkdirSync, mkdtempSync, rmSync, existsSync } from 'node:fs';
+import { writeFileSync, readFileSync, mkdirSync, mkdtempSync, rmSync, existsSync } from 'node:fs';
 import { spawn, spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
@@ -27,6 +34,15 @@ const VIEWPORTS = [375, 768, 1024, 1440];
 const MAIN_VP = 1440;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// PNG 的 IHDR 固定在第 16–24 字节。读真实尺寸，别靠"我记得截了多大"。
+function pngSize(file) {
+  try {
+    const b = readFileSync(file);
+    if (b.length < 24) return null;
+    return { w: b.readUInt32BE(16), h: b.readUInt32BE(20) };
+  } catch { return null; }
+}
 
 // ---------------------------------------------------------------- 引擎探测
 
@@ -49,12 +65,11 @@ function findBrowser() {
   return null; // 交给上层提示用户装一个，或退回源码路线
 }
 
-function pickEngine(projectDir) {
-  if (process.argv.includes('--no-playwright') === false && projectDir) {
+function pickEngine(projectDir, allowPlaywright) {
+  if (allowPlaywright && projectDir) {
     try {
       const req = createRequire(join(projectDir, 'package.json'));
-      const playwright = req('playwright');
-      return { kind: 'playwright', playwright };
+      return { kind: 'playwright', playwright: req('playwright') };
     } catch { /* 没装，正常 */ }
   }
   const exe = findBrowser();
@@ -130,6 +145,18 @@ const PROBE = `(() => {
            overflowX: document.documentElement.scrollWidth > document.documentElement.clientWidth };
 })()`;
 
+// 分段截图的文字索引：只取叶子节点，避免把整棵容器树重复打出来
+const digestExpr = (y0, y1) => `(() => {
+  const out = [];
+  document.querySelectorAll('h1,h2,h3,h4,p,li,button,td,th,a').forEach((el) => {
+    if (el.children.length) return;
+    const t = (el.textContent || '').trim(); if (!t) return;
+    const r = el.getBoundingClientRect(); const top = r.top + window.scrollY;
+    if (top >= ${y0} && top < ${y1}) out.push(el.tagName + ':' + t.slice(0, 44));
+  });
+  return out.slice(0, 14).join(' | ');
+})()`;
+
 // ------------------------------------------------------------------ CDP 引擎
 
 function rpc(ws) {
@@ -156,7 +183,7 @@ function rpc(ws) {
   return { send, once };
 }
 
-async function runCdp(exe, url, outDir) {
+async function runCdp(exe, url, outDir, opts) {
   if (!globalThis.WebSocket || Number(process.versions.node.split('.')[0]) < 22) {
     throw Object.assign(new Error('Node 版本过低：CDP 路线需要 Node ≥ 22（内置 WebSocket）'), { code: 3 });
   }
@@ -211,10 +238,11 @@ async function runCdp(exe, url, outDir) {
     if (r.exceptionDetails) throw new Error('页面内执行出错: ' + JSON.stringify(r.exceptionDetails).slice(0, 300));
     return r.result.value;
   };
-  const shot = async (file, full) => {
-    const p = { format: 'png' }; if (full) p.captureBeyondViewport = true;
-    const r = await send('Page.captureScreenshot', p);
+  const shots = [];
+  const shot = async (file, params) => {
+    const r = await send('Page.captureScreenshot', Object.assign({ format: 'png' }, params || {}));
     writeFileSync(file, Buffer.from(r.data, 'base64'));
+    shots.push({ file, ...(pngSize(file) || {}) });
   };
 
   await send('Emulation.setDeviceMetricsOverride', { width: MAIN_VP, height: 900, deviceScaleFactor: 1, mobile: false });
@@ -226,24 +254,42 @@ async function runCdp(exe, url, outDir) {
 
   const full = await evaluate(COLLECT);
   writeFileSync(join(outDir, `computed-${MAIN_VP}.json`), JSON.stringify(full, null, 2), 'utf8');
-  await shot(join(outDir, `shot-${MAIN_VP}.png`), true);
+  await shot(join(outDir, `shot-${MAIN_VP}.png`), { captureBeyondViewport: true });
 
   const bps = [];
   for (const w of VIEWPORTS) {
     await send('Emulation.setDeviceMetricsOverride', { width: w, height: 900, deviceScaleFactor: 1, mobile: w < 768 });
     await sleep(700);
     bps.push(await evaluate(PROBE));
-    if (w !== MAIN_VP) await shot(join(outDir, `shot-${w}.png`), false);
+    if (w !== MAIN_VP) await shot(join(outDir, `shot-${w}.png`), null);
   }
   writeFileSync(join(outDir, 'breakpoints.json'), JSON.stringify(bps, null, 2), 'utf8');
 
+  // 分段截图：整页 1:11 这种比例，缩放到可读尺寸后信息基本没了，
+  // 必须切成视口大小的段才看得清。顺便给每段一份文字索引，省得逐个开图。
+  const slices = [];
+  if (opts.slice) {
+    const h = opts.slice;
+    const dir = join(outDir, 'slices');
+    mkdirSync(dir, { recursive: true });
+    const docH = full.meta.docH;
+    let n = 0;
+    for (let y = 0; y < docH; y += h) {
+      const hh = Math.min(h, docH - y);
+      const file = join(dir, `slice-${String(n).padStart(2, '0')}-y${y}.png`);
+      await shot(file, { captureBeyondViewport: true, clip: { x: 0, y, width: MAIN_VP, height: hh, scale: 1 } });
+      slices.push({ file, y, h: hh, text: await evaluate(digestExpr(y, y + hh)) });
+      n++;
+    }
+  }
+
   ws.close(); cleanup();
-  return full;
+  return { full, bps, shots, slices };
 }
 
 // ------------------------------------------------------------ Playwright 引擎
 
-async function runPlaywright(playwright, url, outDir) {
+async function runPlaywright(playwright, url, outDir, opts) {
   const browser = await playwright.chromium.launch();
   const ctx = await browser.newContext({ viewport: { width: MAIN_VP, height: 900 } });
   const page = await ctx.newPage();
@@ -251,59 +297,161 @@ async function runPlaywright(playwright, url, outDir) {
   await page.evaluate(() => (document.fonts ? document.fonts.ready : Promise.resolve()));
   await page.waitForTimeout(1200);
 
+  const shots = [];
+  const snap = async (file, fullPage) => {
+    await page.screenshot({ path: file, fullPage: !!fullPage });
+    shots.push({ file, ...(pngSize(file) || {}) });
+  };
+
   const full = await page.evaluate(COLLECT);
   writeFileSync(join(outDir, `computed-${MAIN_VP}.json`), JSON.stringify(full, null, 2), 'utf8');
-  await page.screenshot({ path: join(outDir, `shot-${MAIN_VP}.png`), fullPage: true });
+  await snap(join(outDir, `shot-${MAIN_VP}.png`), true);
 
   const bps = [];
   for (const w of VIEWPORTS) {
     await page.setViewportSize({ width: w, height: 900 });
     await page.waitForTimeout(700);
     bps.push(await page.evaluate(PROBE));
-    if (w !== MAIN_VP) await page.screenshot({ path: join(outDir, `shot-${w}.png`) });
+    if (w !== MAIN_VP) await snap(join(outDir, `shot-${w}.png`), false);
   }
   writeFileSync(join(outDir, 'breakpoints.json'), JSON.stringify(bps, null, 2), 'utf8');
 
+  // 分段截图：Playwright 用 clip 实现，语义和 CDP 一致
+  const slices = [];
+  if (opts.slice) {
+    const h = opts.slice;
+    const dir = join(outDir, 'slices');
+    mkdirSync(dir, { recursive: true });
+    const docH = full.meta.docH;
+    let n = 0;
+    for (let y = 0; y < docH; y += h) {
+      const hh = Math.min(h, docH - y);
+      const file = join(dir, `slice-${String(n).padStart(2, '0')}-y${y}.png`);
+      await page.screenshot({ path: file, clip: { x: 0, y, width: MAIN_VP, height: hh } });
+      shots.push({ file, ...(pngSize(file) || {}) });
+      slices.push({ file, y, h: hh, text: await page.evaluate(digestExpr(y, y + hh)) });
+      n++;
+    }
+  }
+
   await browser.close();
-  return full;
+  return { full, bps, shots, slices };
+}
+
+// ------------------------------------------------------- 只读模式（W12）
+
+function readMode(outDir) {
+  const computed = JSON.parse(readFileSync(join(outDir, `computed-${MAIN_VP}.json`), 'utf8'));
+  const rank = (rows) => rows.map(([v, n]) => `${v}(${n})`).join('  ');
+  const L = [];
+  L.push(`标题      ${computed.meta.title}`);
+  L.push(`URL       ${computed.meta.url}`);
+  L.push(`页面总高  ${computed.meta.docH}px`);
+  L.push(`导航      ${computed.nav ? computed.nav.h + 'px  bg ' + computed.nav.bg : '未识别'}`);
+  for (const k of ['fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing',
+                   'color', 'backgroundColor', 'borderRadius', 'boxShadow']) {
+    if (computed.tokens[k] && computed.tokens[k].length) L.push(`${k.padEnd(9)} ${rank(computed.tokens[k].slice(0, 6))}`);
+  }
+  L.push('');
+  L.push('标题层级：');
+  for (const h of computed.headings) L.push(`  ${h.size.padStart(6)} / ${h.weight}  ${h.tag}  ${h.text}`);
+  L.push('');
+  L.push(`按钮（${computed.buttons.length} 个，去重前 6 个）：`);
+  for (const b of computed.buttons.slice(0, 6)) {
+    L.push(`  ${String(b.h).padStart(3)}px  r=${b.radius}  ${b.fs}/${b.fw}  bg=${b.bg}  ${b.text}`);
+  }
+  L.push('');
+  L.push('分区：');
+  for (const s of computed.sections.slice(0, 14)) {
+    L.push(`  y=${String(s.y).padStart(6)} h=${String(s.h).padStart(5)}  ${s.tag.padEnd(8)} ${s.bg}`);
+  }
+  try {
+    const bps = JSON.parse(readFileSync(join(outDir, 'breakpoints.json'), 'utf8'));
+    L.push('');
+    L.push('断点：');
+    for (const b of bps) {
+      L.push(`  ${String(b.vw).padStart(4)}  导航 ${b.navH}px  区块 ${b.borderedBlocks}  页高 ${b.docH}  横向溢出 ${b.overflowX ? '有' : '无'}`);
+    }
+  } catch { /* 没有就算了 */ }
+  console.log(L.join('\n'));
 }
 
 // ------------------------------------------------------------------- 入口
 
 const main = async () => {
-  const [url, outDir] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
+  const argv = process.argv.slice(2);
+  const flags = argv.filter((a) => a.startsWith('--'));
+  const pi = argv.indexOf('--project');
+  const ri = argv.indexOf('--read');
+  const si = argv.indexOf('--slice');
+  // 选项的值也要从位置参数里排掉
+  const consumed = new Set();
+  if (pi > -1) consumed.add(pi + 1);
+  if (ri > -1) consumed.add(ri + 1);
+  if (si > -1 && argv[si + 1] && !argv[si + 1].startsWith('--')) consumed.add(si + 1);
+  const positional = argv.filter((a, i) => !a.startsWith('--') && !consumed.has(i));
+
+  if (ri > -1) { readMode(argv[ri + 1]); return; }
+
+  const [url, outDir] = positional;
   if (!url || !outDir) {
-    console.error('用法: node browser-extract.mjs <url> <outDir> [--project <项目根>] [--no-playwright]');
+    console.error('用法: node browser-extract.mjs <url> <outDir> [--project <目录>] [--no-playwright] [--slice [px]]');
+    console.error('      node browser-extract.mjs --read <outDir>');
     process.exit(2);
   }
-  const pi = process.argv.indexOf('--project');
-  const projectDir = pi > -1 ? process.argv[pi + 1] : process.cwd();
+  const projectDir = pi > -1 ? argv[pi + 1] : process.cwd();
+  const opts = {
+    slice: si > -1 ? Number((argv[si + 1] && !argv[si + 1].startsWith('--')) ? argv[si + 1] : 900) : 0,
+  };
   mkdirSync(outDir, { recursive: true });
 
-  const engine = pickEngine(projectDir);
+  const engine = pickEngine(projectDir, !flags.includes('--no-playwright'));
   if (engine.kind === 'none') {
     console.error('没有可用的浏览器引擎。装一个 Chrome / Edge / Chromium 即可，或退回源码路线。');
     process.exit(3);
   }
-  console.error(`引擎: ${engine.kind}${engine.kind === 'cdp' ? ' (' + engine.exe + ')' : ''}`);
 
-  const result = engine.kind === 'playwright'
-    ? await runPlaywright(engine.playwright, url, outDir)
-    : await runCdp(engine.exe, url, outDir);
+  const { full, bps, shots, slices } = engine.kind === 'playwright'
+    ? await runPlaywright(engine.playwright, url, outDir, opts)
+    : await runCdp(engine.exe, url, outDir, opts);
 
-  // 终端只回摘要——完整结果在 JSON 里，别灌进上下文
-  const top = (k) => result.tokens[k].slice(0, 4).map(([v, n]) => `${v}(${n})`).join('  ');
-  console.log(`标题       ${result.meta.title}`);
-  console.log(`最终 URL   ${result.meta.url}`);
-  console.log(`页面总高   ${result.meta.docH}px`);
-  console.log(`导航       ${result.nav ? result.nav.h + 'px  bg ' + result.nav.bg : '未识别'}`);
-  console.log(`字体栈     ${top('fontFamily')}`);
-  console.log(`字号       ${top('fontSize')}`);
-  console.log(`字重       ${top('fontWeight')}`);
-  console.log(`正文字色   ${top('color')}`);
-  console.log(`圆角       ${top('borderRadius')}`);
-  console.log(`按钮样本   ${result.buttons.length} 个`);
-  console.log(`\n产物在 ${outDir}/`);
+  // ── 摘要。首要目的是别让人把静默错误当成正常结果。
+  const L = [];
+  const norm = (u) => String(u).replace(/\/+$/, '');
+  if (norm(full.meta.url) !== norm(url)) {
+    L.push(`⚠️  发生了重定向：${url}`);
+    L.push(`    → ${full.meta.url}`);
+    L.push('    地区/语言可能被自动改写（例如计价货币、文案语言）。');
+    L.push('    要么以重定向后的版本为准并在 design.md 里写明，要么换一个不带地区判定的入口。');
+    L.push('');
+  }
+  L.push(`引擎      ${engine.kind}${engine.kind === 'cdp' ? '  (' + engine.exe + ')' : ''}`);
+  L.push(`标题      ${full.meta.title}`);
+  L.push(`最终 URL  ${full.meta.url}`);
+  L.push(`页面总高  ${full.meta.docH}px`);
+  L.push(`导航      ${full.nav ? full.nav.h + 'px  bg ' + full.nav.bg : '未识别'}`);
+  const top = (k) => full.tokens[k].slice(0, 4).map(([v, n]) => `${v}(${n})`).join('  ');
+  L.push(`字体栈    ${top('fontFamily')}`);
+  L.push(`字号      ${top('fontSize')}`);
+  L.push(`字重      ${top('fontWeight')}`);
+  L.push(`正文字色  ${top('color')}`);
+  L.push(`圆角      ${top('borderRadius')}`);
+  L.push('');
+  L.push('截图（尺寸读自 PNG 头，不是猜的）：');
+  for (const s of shots) {
+    const ratio = s.h && s.w ? (s.h / s.w) : 0;
+    const warn = ratio > 4 ? '   ⚠️ 比例极端（1:' + Math.round(ratio) + '），缩放到可读尺寸后信息基本没了——用 --slice 分段看' : '';
+    L.push(`  ${s.file.split(/[\\/]/).pop().padEnd(20)} ${String(s.w).padStart(4)} × ${String(s.h).padStart(5)}${warn}`);
+  }
+  if (slices.length) {
+    L.push('');
+    L.push(`分段截图 ${slices.length} 段（每段带文字索引，省得逐个开图）：`);
+    for (const s of slices) L.push(`  y=${String(s.y).padStart(6)}  ${s.text}`);
+  }
+  L.push('');
+  L.push(`产物在 ${outDir}/`);
+  L.push(`要看可读摘要：node browser-extract.mjs --read ${outDir}`);
+  console.log(L.join('\n'));
 };
 
 main().catch((e) => {

@@ -34,21 +34,30 @@
 ② 机器上有 Chrome / Edge / Chromium？
    → 用随本 Skill 发的 scripts/browser-extract.mjs（零依赖，Node ≥ 22）
 ③ 都没有？
-   → 退源码路线，并且**必须**在 design.md 开头写「转录边界」，
+   → 退源码路线，并且**必须**在 design.md 开头写好「证据边界」，
      在交付说明里讲清缺了什么、怎么补
+
+④ 有浏览器也照样要写「证据边界」——只是内容不同：写「本次覆盖了什么 / 没覆盖什么」，
+   没缺口就写「无」。别以为走了浏览器路线就没有边界了
 ```
 
 ## 怎么跑
 
 ```bash
-# 项目根用于解析用户的 playwright（有就用，没有就自动退 CDP）
+# 基本：--project 指定项目根，用于解析用户的 playwright（有就用，没有就自动退 CDP）
 node <this-skill>/scripts/browser-extract.mjs <url> <产物目录> --project <项目根>
 
 # 确定不想用 playwright 时
 node <this-skill>/scripts/browser-extract.mjs <url> <产物目录> --no-playwright
+
+# 页面很长时额外分段截图（默认 900px 一段），每段附文字索引
+node <this-skill>/scripts/browser-extract.mjs <url> <产物目录> --slice
+
+# 回头读结果：打成可读摘要
+node <this-skill>/scripts/browser-extract.mjs --read <产物目录>
 ```
 
-脚本只在终端回一段摘要——**完整结果写在 JSON 里，别把 JSON 整个读进上下文**。
+脚本只在终端回一段摘要——**完整结果写在 JSON 里，别把 JSON 整个读进上下文，用 `--read` 看**。
 
 ## 三个产物怎么读
 
@@ -57,11 +66,31 @@ node <this-skill>/scripts/browser-extract.mjs <url> <产物目录> --no-playwrig
 | `computed-<宽>.json` | `tokens.*` 是**按出现频次排序**的计算样式；`headings` / `buttons` 是真实规格 |
 | `breakpoints.json` | 375 / 768 / 1024 / 1440 四档的导航高、带框区块数、页高、是否横向溢出 |
 | `shot-<宽>.png` | 视觉证据。**只有它能回答「谁更抢眼」** |
+| `slices/` | 分段截图 + 每段文字索引（用了 `--slice` 才有） |
+
+**先用 `--read` 看摘要，再决定要不要翻 JSON。** 摘要把令牌、标题层级、按钮规格、分区、断点
+都打平了，一屏看完；JSON 只在摘要不够细时才读。
+
+**截图一定要看尺寸。** 摘要把每张图的像素尺寸打出来，比例超过 1:4 会标警告——
+一张 1440×16148 的全页图缩到能读的尺寸后基本什么都看不清，
+**「有全页截图」会给人「视觉已覆盖」的错觉，实际没覆盖。** 这时候用 `--slice` 重新分段落图。
 
 写进 `design.md` 时，这些值的证据等级是 `[OBSERVED: URL]`——**计算样式就是已观察的事实**，
 可以直接当复刻约束用（这一点和源码路线不同，源码路线拿到的是 `[INFERRED]`）。
 
 ## 坑
+
+### ⚠️ 先看这条：页面可能被静默重定向到地区版本
+
+请求 `stripe.com/pricing`，服务端 302 到 `stripe.com/zh-hk/pricing`——**英文站变成了香港中文站，
+计价从美元变成了港币**。这一切没有任何报错。
+
+脚本现在会在摘要**首行打出重定向警告**，但你要主动处理它：
+
+- 以重定向后的版本为准 → 在 `design.md` 的「证据」表里写明最终 URL 和地区影响
+- 或者换一个不带地区判定的入口（多数站点有 `?country=` 之类的参数）
+
+**别不看就叫它「Stripe 的定价页」**——你拿到的可能是港币版，而你以为在描述美版。
 
 ### 1. 频次高 ≠ 重要
 
